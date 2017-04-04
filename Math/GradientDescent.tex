@@ -1,0 +1,82 @@
+\documentclass{tufte-handout}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+  \newenvironment{inlinenum}
+    {\begin{enumerate}
+      [ itemsep    = -1mm
+      , topsep     = -1mm
+      , leftmargin = .5in
+      ]}
+    {\vskip 1mm\end{enumerate}}
+
+\begin{document}
+  \title{Gradient Descent for Two-way Fixed Effects}
+  \author{Yiqing Xu, Minsheng Liu}
+  \maketitle
+
+  Assume we have a linear system with $m$ parameters and $n$ observations which
+  has two-way fixed effects, one with $k$ and another $l$ group values.
+  We have the following linear system
+  \begin{align*}
+    \phi(\vec{\beta}, \vec{\alpha}, \vec{\chi}, \vec{\mu})
+    &= X\vec{\beta} + D_1\vec{\alpha} + D_2\vec{\chi} + \vec{\mu} \, , \\
+    \vec{y}
+    &= \phi(\vec{\beta}, \vec{\alpha}, \vec{\chi}, \vec{\mu}) + \vec{\epsilon} \, ,
+  \end{align*}
+  where
+  \begin{inlinenum}
+    \item $\vec{y}, \vec{\mu}, \vec{\epsilon} \in \mathbb{R}^n$ denote
+      the responses, intercepts\footnote{Note that $\mu_i = \mu_j$ for $i \neq j$.},
+      and errors;
+    \item $X \in \mathbb{R}^n \times \mathbb{R}^m$ represents the observed variables;
+      $\vec{\beta} \in \mathbb{R}^m$ is the parameter vector to compute;
+    \item $D_1: \mathbb{R}^k \to \mathbb{R}^n$ is the linear transformation%
+      (i.e. the dummy matrix) associating the $k$ groups of the first fixed
+      effect with the $n$ observations; $\vec{\alpha} \in \mathbb{R}^k$ is
+      for the first fixed effect;
+    \item $D_2: \mathbb{R}^l \to \mathbb{R}^n$ and $\vec{\chi} \in \mathbb{R}^l$.
+  \end{inlinenum}
+  
+  The function to minimize:
+  \[
+    f(\vec{\beta}, \vec{\alpha}, \vec{\chi}, \vec{\mu}) =
+    (\phi(\vec{\beta}, \vec{\alpha}, \vec{\chi}, \vec{\mu}) - \vec{y})^2 \, .
+  \]
+  We approach the solution by gradient descent.
+  Given $\tilde{\beta}, \tilde{\alpha}, \tilde{\chi}, \tilde{\mu}$ of the last
+  iteration, define
+  \begin{align*}
+    \bar{\beta}
+    &= \phi(\tilde{\beta}, \tilde{\alpha}, \tilde{\chi}, \tilde{\mu})
+     - X\tilde{\beta} - \tilde{y} \, , \\
+    \bar{\alpha}
+    &= \phi(\tilde{\beta}, \tilde{\alpha}, \tilde{\chi}, \tilde{\mu})
+     - D_1\tilde{\alpha} - \tilde{y} \, , \\
+    \bar{\chi}
+    &= \phi(\tilde{\beta}, \tilde{\alpha}, \tilde{\chi}, \tilde{\mu})
+     - D_2\tilde{\chi} - \tilde{y} \, , \\
+    \bar{\mu}
+    &= \phi(\tilde{\beta}, \tilde{\alpha}, \tilde{\chi}, \tilde{\mu})
+     - \tilde{\mu} - \tilde{y} \, .
+  \end{align*}
+  The new iteration is given as follows,
+  \newcommand \Count{\mathsf{count}}
+  \newcommand \Col{\mathsf{col}}
+  \begin{align*}
+    \hat{\beta}
+    &= (X^{\top}X)^{-1}(X^{\top}\bar{\beta}) \, , \\
+    \hat{\alpha}_i
+    &= \dfrac{\Col_i(D_1) \cdot \bar{\alpha}}{\Count(\Col_i(D_1))} \, , \\
+    \hat{\chi}_i
+    &= \dfrac{\Col_i(D_2) \cdot \bar{\chi}}{\Count(\Col_i(D_2))} \, , \\
+    \hat{\mu}
+    &=
+      \left( \dfrac{1}{n} \cdot \sum_{i} \bar{\mu}_i \right)
+      \langle 1, \hdots, 1 \rangle \, ,
+  \end{align*}
+  where $\Count$ counts the number of non-zero entries in the vector
+  and $\Col$ is the column selector.
+
+\end{document}

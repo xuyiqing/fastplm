@@ -1,9 +1,11 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
+**/.Rproj.user/
+**/.Rhistory
+**/.RData
+**/.Ruserdata
+**/.Rbuildignore
+**/RcppExports.cpp
 
-src/RcppExports.cpp
+CXXCode/build/
 
 *.o
 *.so

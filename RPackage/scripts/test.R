@@ -49,18 +49,18 @@ out2 <- felm(y ~ x1 + x2 | gp1 + gp2 + gp3, data = d)
 coef(out2) 
 
 ## fastplm
-library(Rcpp)
-sourceCpp("./cpp/fastplm.cpp")
+#library(Rcpp)
+#sourceCpp("./cpp/fastplm.cpp")
 
-out3<-fastplm(as.matrix(d[,c("y","x1","x2")]), as.matrix(d[,c("gp1","gp2","gp3")]))
-out3$coefficients
+#out3<-fastplm(as.matrix(d[,c("y","x1","x2")]), as.matrix(d[,c("gp1","gp2","gp3")]))
+#out3$coefficients
 
 ## speedtest
 library(rbenchmark)
 benchmark(
     out1 <- lm(y~ x1 + x2 + as.factor(gp1) + as.factor(gp2) + as.factor(gp3), d),
     out2 <- felm(y ~ x1 + x2 | gp1 + gp2 + gp3, data = d),
-    out3<-fastplm(as.matrix(d[,c("y","x1","x2")]), as.matrix(d[,c("gp1","gp2","gp3")])),
+    #out3<-fastplm(as.matrix(d[,c("y","x1","x2")]), as.matrix(d[,c("gp1","gp2","gp3")])),
     order = NULL
 )
 
