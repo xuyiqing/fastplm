@@ -1,5 +1,6 @@
 #include "FixedEffect.h"
 #include "GradientDescent.h"
+#include "MAP.h"
 
 // [[Rcpp::export()]]
 List fastplm(arma::mat rawData, arma::mat rawFixedEffects) {
@@ -10,7 +11,7 @@ List fastplm(arma::mat rawData, arma::mat rawFixedEffects) {
   for (int i = 0; i < rawFixedEffects.n_cols; i ++)
     fixedEffects.push_back(FixedEffect::fromColumn(rawFixedEffects.col(i)));
 
-  GradientDescent solver(X, Y, fixedEffects);
+  MAP solver(X, Y, fixedEffects);
   solver.compute();
   
   List result;

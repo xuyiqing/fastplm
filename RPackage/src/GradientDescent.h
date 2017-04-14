@@ -3,33 +3,20 @@
 
 #include "Common.h"
 #include "FixedEffect.h"
+#include "PlainModel.h"
 
-struct GradientDescent {
-    arma::uword paramCount;
-    arma::uword observationCount;
-    
-    const arma::mat X;
-    const arma::colvec Y;
-    const std::vector<FixedEffect>& fixedEffects;
-    
-    const arma::mat XtXInverse;
-    
-    GradientDescent(const arma::mat& X_, const arma::colvec& Y_, const std::vector<FixedEffect>& fixedEffects);
-    
-    struct Result {
-        arma::colvec params;
-        std::vector<arma::colvec> effects;
-        double intercept;
-        
-        double computeDiff(const Result& last);
-    };
-    Result result;
-    
+struct GradientDescent: public PlainModel {
+private:
     arma::colvec nextParams(const arma::colvec&);
     arma::colvec nextFixedEffect(const FixedEffect&, const arma::colvec&);
     double nextIntercept(const arma::colvec&);
-    
     arma::colvec computeResidual(const Result&);
+
+public:
+    GradientDescent(const arma::mat& X, const arma::colvec& Y,
+                    const std::vector<FixedEffect>& fixedEffects,
+                    bool computeXtXInverse = true);
+    
     void compute();
 };
 

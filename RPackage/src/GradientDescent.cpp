@@ -1,7 +1,9 @@
 #include "GradientDescent.h"
 
-GradientDescent::GradientDescent(const arma::mat& X_, const arma::colvec& Y_, const std::vector<FixedEffect>& fixedEffects_)
-: X(X_), Y(Y_), fixedEffects(fixedEffects_), paramCount(X_.n_cols), observationCount(X_.n_rows), XtXInverse(arma::inv(X.t() * X)) {}
+GradientDescent::GradientDescent(const arma::mat& X, const arma::colvec& Y,
+                                 const std::vector<FixedEffect>& fixedEffects,
+                                 bool computeXtXInverse):
+    PlainModel(X, Y, fixedEffects, computeXtXInverse) {}
 
 arma::colvec GradientDescent::nextParams(const arma::colvec& partialResidual) {
     return XtXInverse * (X.t() * partialResidual);
