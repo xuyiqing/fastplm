@@ -11,9 +11,13 @@ include_directories(include)
 add_library(FastPLM
   include/Common.h
   include/FixedEffect.h
+  include/PlainModel.h
+  include/MAP.h
   include/GradientDescent.h
   include/MatrixReader.h
   src/FixedEffect.cpp
+  src/PlainModel.cpp
+  src/MAP.cpp
   src/GradientDescent.cpp
   src/MatrixReader.cpp
   )
@@ -27,4 +31,4 @@ target_link_libraries(
   Test-BasicGradientDescent
   FastPLM
   /usr/local/lib/libarmadillo.dylib
-  )
+ )

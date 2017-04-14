@@ -9,3 +9,4 @@ CXXCode/build/
 
 *.o
 *.so
+.Rproj.user

@@ -3,11 +3,12 @@
 
 #include "MatrixReader.h"
 #include "GradientDescent.h"
+#include "MAP.h"
 
 using namespace std;
 
 int main () {
-    auto inputFile = "/Users/selveskii/Documents/Z171.Quantitive Analysis/Projects/better-fastplm/CXXCode/tests/basic-data.txt";
+    auto inputFile = "/Users/selveskii/Documents/Z171.Quantitive Analysis/Projects/fastplm/CXXCode/tests/basic-data.txt";
     ifstream input(inputFile);
     
     auto rawData = readMatrix(input);
@@ -19,12 +20,19 @@ int main () {
     for (int i = 0; i < rawFixedEffects.n_cols; i ++)
         fixedEffects.push_back(FixedEffect::fromColumn(rawFixedEffects.col(i)));
     
-    GradientDescent solver(X, Y, fixedEffects);
-    solver.compute();
-    auto result = solver.result;
+//    GradientDescent solver1(X, Y, fixedEffects);
+    MAP solver2(X, Y, fixedEffects);
+//    solver1.compute();
+    solver2.compute();
     
     ofstream output("/Users/selveskii/Desktop/result.txt");
-    output << result.params << endl;
-    output << result.intercept << endl;
+//    output << solver1.result.params << endl;
+    output << solver2.result.params << endl;
+
+//    for (int i = 0; i < solver1.result.effects.size(); i ++)
+//        cout << solver1.result.effects[i] << endl;
+    
+    for (int i = 0; i < solver2.result.effects.size(); i ++)
+        cout << solver2.result.effects[i] << endl;
     return 0;
 }
