@@ -1,36 +1,45 @@
 #include "FixedEffect.h"
 
-FixedEffect::FixedEffect(const arma::mat& indicator_, FixedEffect::Indices indices)
-: indicator(indicator_), groupCount(indicator_.n_cols), observationCount(indicator_.n_rows), indices(indices)
-{
-    valuesOccurences = std::vector<int>(groupCount);
-    for (arma::uword i = 0; i < groupCount; i ++) {
-        int count = 0;
-        auto col = indicator.col(i);
-        for (arma::uword j = 0; j < observationCount; j ++)
-            if (col(j) != 0)
-                count ++;
-        valuesOccurences[i] = count;
-    }
-}
+#include <unordered_set>
 
-FixedEffect FixedEffect::fromColumn(const arma::colvec& column, FixedEffect::Indices indices) {
-    size_t groupCount = indices.size();
-    arma::mat indicator = arma::zeros(column.n_rows, groupCount);
-    
-    for (int i = 0; i < column.n_rows; i ++) {
-        double effectValue = column(i);
-        indicator(i, indices[effectValue]) = 1;
-    }
-    
-    return FixedEffect(indicator, indices);
-}
+FixedEffect::FixedEffect() {}
 
 FixedEffect FixedEffect::fromColumn(const arma::colvec& column) {
-    arma::colvec effectValues = arma::unique(column);
-    std::sort(effectValues.begin(), effectValues.end());
-    FixedEffect::Indices indices;
-    for (int i = 0; i < effectValues.size(); i ++)
-        indices.insert({effectValues(i), i});
-    return FixedEffect::fromColumn(column, indices);
+    std::unordered_map<double, int> valueCounters;
+    
+    for (double val : column) {
+        auto iter = valueCounters.find(val);
+        if (iter == valueCounters.end())
+            valueCounters.insert({ val, 1 });
+        else
+            iter->second ++;
+    }
+    
+    std::vector<std::pair<double, int>>
+    listOfValueCounters(valueCounters.begin(), valueCounters.end());
+    std::sort(listOfValueCounters.begin(), listOfValueCounters.end(),
+              [](std::pair<double, int> lhs, std::pair<double, int> rhs){
+                  return lhs.first < rhs.first;
+              });
+    
+    FixedEffect effect;
+    effect.groupCount = valueCounters.size();
+    effect.observationCount = column.n_rows;
+    
+    effect.valuesOccurences = std::vector<int>(effect.groupCount);
+    std::transform(listOfValueCounters.cbegin(), listOfValueCounters.cend(),
+                   effect.valuesOccurences.begin(),
+                   [](std::pair<double, int> x) { return x.second; } );
+    
+    effect.indices = FixedEffect::Indices();
+    for (int i = 0; i < listOfValueCounters.size(); i ++)
+        effect.indices.insert({listOfValueCounters[i].first, i});
+    
+    effect.indicator = arma::zeros(column.n_rows, effect.groupCount);
+    for (int i = 0; i < column.n_rows; i ++) {
+        double effectValue = column(i);
+        effect.indicator(i, effect.indices[effectValue]) = 1;
+    }
+    
+    return effect;
 }

@@ -8,7 +8,7 @@ setwd("~/Github/fastplm")
 ## Simulating FE sample
 
 set.seed(123)
-n <- 10000
+n <- 1000000
 nlvl <- 20
 x1 <- rnorm(n, 3)
 x2 <- rnorm(n, 3)
@@ -38,35 +38,15 @@ y <- 5 + 7 * x1 + 3 * x2 + 2 * x3 + 5 * x4 + 8 * x5 + gp.eff[,1] + gp.eff[,2] + 
 
 ## put in a data frame
 d <- cbind.data.frame("id"=1:n, gp, y, x1, x2, x3, x4, x5, gp.eff, e)
-head(d)
-
-## Regressions
-
-### ols
-out1 <- lm(y~ x1 + x2 + as.factor(gp1) + as.factor(gp2) + as.factor(gp3), d)
-coef(out1)[1:3]
-
-## lfe
-library(lfe)
-out2 <- felm(y ~ x1 + x2 | gp1 + gp2 + gp3, data = d)
-coef(out2) 
-
-## fastplm
-#library(Rcpp)
-#sourceCpp("./cpp/fastplm.cpp")
-
-#out3<-fastplm(as.matrix(d[,c("y","x1","x2")]), as.matrix(d[,c("gp1","gp2","gp3")]))
-#out3$coefficients
 
 ## speedtest
 library(lfe)
 library(rbenchmark)
 benchmark(
-    #out1 <- lm(y~ x1 + x2 + as.factor(gp1) + as.factor(gp2) + as.factor(gp3), d),
-    out2 <- felm(y ~ x1 + x2 + x3 + x4 + x5 | gp1 + gp2 + gp3, data = d),
-    #out3<-fastplm(as.matrix(d[,c("y","x1","x2","x3","x4","x5")]), as.matrix(d[,c("gp1","gp2","gp3")])),
-    out4<-fastplm(as.matrix(d[,c("y","x1","x2","x3","x4","x5")]), as.matrix(d[,c("gp1","gp2","gp3")])),
-    order = NULL
+    outFELM    <- felm(y ~ x1 + x2 + x3 + x4 + x5 | gp1 + gp2 + gp3, data = d),
+    outFastPLM <- fastplm(as.matrix(d[,c("y","x1","x2","x3","x4","x5")]), as.matrix(d[,c("gp1","gp2","gp3")])),
+    order = NULL,
+    replications = 1
 )
 
 ## results

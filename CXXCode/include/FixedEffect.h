@@ -14,10 +14,10 @@ struct FixedEffect {
     typedef std::unordered_map<double, int> Indices;
     Indices indices;
     
-    FixedEffect(const arma::mat& indicator_, Indices indices = Indices());
-    
-    static FixedEffect fromColumn(const arma::colvec& column, Indices indices);
     static FixedEffect fromColumn(const arma::colvec& column);
+    
+private:
+    FixedEffect();
 };
 
 #endif
