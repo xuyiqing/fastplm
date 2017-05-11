@@ -13,11 +13,13 @@ add_library(FastPLM
   include/FixedEffect.h
   include/PlainModel.h
   include/MAP.h
+  include/GPanelMAP.h
   include/GradientDescent.h
   include/MatrixReader.h
   src/FixedEffect.cpp
   src/PlainModel.cpp
   src/MAP.cpp
+  src/GPanelMAP.cpp
   src/GradientDescent.cpp
   src/MatrixReader.cpp
   )
