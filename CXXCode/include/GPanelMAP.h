@@ -1,6 +1,8 @@
 #ifndef FASTPLM_GPANEL_MAP_H
 #define FASTPLM_GPANEL_MAP_H
 
+#include <vector>
+
 #include "Common.h"
 
 struct GPanelMAP {
@@ -10,31 +12,24 @@ private:
     const arma::uword indivCount;
     
     // X[param][time][indiv]
-    const arma::cube X;
-    const arma::mat Y;
+    arma::cube X;
+    arma::mat Y;
     
-    // timeInfo[time][param]
-    const arma::mat timeInfo;
-    const arma::uword timeParamCount;
+    arma::mat tois;
+    arma::mat iots;
     
-    const arma::mat indivInfo;
-    const arma::uword indivParamCount;
+    const bool isBalanced;
+    
+    void MAP();
+    
+    template <bool IsBalanced>
+    friend struct BalanceManager;
     
 public:
-    GPanelMAP(const arma::cube& X, const arma::mat& Y,
-              const arma::mat& timeInfo, const arma::colvec& indivInfo);
-
+    GPanelMAP(arma::cube X, arma::mat Y, arma::mat tois, arma::mat iots,
+              bool isBalanced = true, bool withFixedEffects = true);
+    
     arma::colvec compute();
-    
-private:
-    arma::mat timeRegressors;
-    arma::mat indivRegressors;
-    
-    arma::cube X_;
-    arma::mat Y_;
-    
-    void buildRegressors();
-    void MAP();
 };
 
 #endif

@@ -14,12 +14,14 @@ add_library(FastPLM
   include/PlainModel.h
   include/MAP.h
   include/GPanelMAP.h
+  include/GPanelGradientDescent.h
   include/GradientDescent.h
   include/MatrixReader.h
   src/FixedEffect.cpp
   src/PlainModel.cpp
   src/MAP.cpp
   src/GPanelMAP.cpp
+  src/GPanelGradientDescent.cpp
   src/GradientDescent.cpp
   src/MatrixReader.cpp
   )
@@ -34,3 +36,5 @@ target_link_libraries(
   FastPLM
   /usr/local/lib/libarmadillo.dylib
  )
+
+add_subdirectory(tests)

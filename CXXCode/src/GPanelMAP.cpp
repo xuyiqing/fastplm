@@ -1,67 +1,190 @@
+#include <vector>
+
 #include "GPanelMAP.h"
 
-GPanelMAP::GPanelMAP(const arma::cube& X, const arma::mat& Y,
-                     const arma::mat& timeInfo, const arma::colvec& indivInfo):
-    paramCount(X.n_slices), timeCount(X.n_rows), indivCount(X.n_cols),
-    X(X), Y(Y),
-    timeInfo(timeInfo), timeParamCount(timeInfo.n_rows),
-    indivInfo(indivInfo), indivParamCount(indivInfo.n_rows) {}
+typedef std::vector<arma::uword> OffsetT;
 
-void GPanelMAP::buildRegressors() {
-    arma::mat augmented;
-    arma::rowvec summer;
+template <bool IsBalanced>
+struct BalanceManager {
+    GPanelMAP *ptr;
     
-    augmented = timeInfo;
-    augmented.insert_cols(0, 1);
-    augmented.col(0) = arma::ones(timeCount);
-    summer = arma::ones(1 + timeParamCount);
-    timeRegressors =
-        summer * arma::inv(augmented.t() * augmented) * augmented.t();
+    arma::mat defaultPtois;
+    arma::mat defaultPiots;
+    
+    std::vector<arma::mat> Ptoises;
+    std::vector<arma::mat> Piotses;
+    std::vector<OffsetT> timeOffsets;
+    std::vector<OffsetT> indivOffsets;
+    
+public:
+    arma::vec deflateVec(const arma::vec& vec, int id, bool byTime = true);
+    arma::mat deflateMat(const arma::mat& mat, int id, bool byTime = true);
+    arma::vec inflateVec(const arma::vec& vec, int id, bool byTime = true);
+    
+    BalanceManager(GPanelMAP *ptr);
+    
+    const arma::mat& getPtois(int indiv);
+    const arma::mat& getPiots(int time);
+    
+    void MAP();
+};
 
-    augmented = indivInfo;
-    augmented.insert_cols(0, 1);
-    augmented.col(0) = arma::ones(indivCount);
-    summer = arma::ones(1 + indivParamCount);
-    indivRegressors =
-        summer * arma::inv(augmented.t() * augmented) * augmented.t();
-
-
+template<> arma::vec
+BalanceManager<false>::deflateVec(const arma::vec& vec, int id, bool byTime) {
+    const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
+    arma::vec vec_(offset.size());
+    for (int i = 0; i < offset.size(); i ++)
+        vec_(i) = vec(offset[i]);
+    return vec_;
 }
 
-void GPanelMAP::MAP() {
-    arma::cube data = arma::join_slices(Y, X);
+template<> arma::vec
+BalanceManager<true>::deflateVec(const arma::vec& vec, int id, bool byTime) {
+    return vec;
+}
+
+template<> arma::mat
+BalanceManager<false>::deflateMat(const arma::mat& mat, int id, bool byTime) {
+    const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
+    arma::mat mat_(mat.n_rows, offset.size());
+    for (int i = 0; i < mat.n_rows; i ++)
+        mat_.row(i) = deflateVec(mat.row(i), id, byTime);
+    return mat_;
+}
+
+template<> arma::mat
+BalanceManager<true>::deflateMat(const arma::mat& mat, int id, bool byTime) {
+    return mat;
+}
+
+template<> arma::vec
+BalanceManager<false>::inflateVec(const arma::vec& vec, int id, bool byTime) {
+    const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
+    arma::vec vec_ = arma::zeros(offset[offset.size() - 1] + 1);
+    for (int i = 0; i < offset.size(); i ++)
+        vec_(offset[i]) = vec(i);
+    return vec_;
+}
+
+template<> arma::vec
+BalanceManager<true>::inflateVec(const arma::vec& vec, int id, bool byTime) {
+    return vec;
+}
+
+inline arma::mat makePtois(const arma::mat& tois) {
+    return tois * arma::inv(tois.t() * tois) * tois.t();
+}
+
+inline arma::mat makePiots(const arma::mat& iots) {
+    return makePtois(iots).t();
+}
+
+template<>
+BalanceManager<false>::BalanceManager(GPanelMAP *ptr_)
+: ptr(ptr_), Ptoises({}), Piotses({}), timeOffsets({}), indivOffsets({})
+{
+    for (int i = 0; i < ptr->Y.n_rows; i ++) {
+        OffsetT offset;
+        for (int j = 0; j < ptr->Y.n_cols; j ++)
+            if (!isnan(ptr->Y(i, j)))
+                offset.push_back(j);
+        
+        timeOffsets.push_back(std::move(offset));
+        Ptoises.push_back(makePtois(deflateMat(ptr->tois, i, true)));
+    }
+    
+    for (int i = 0; i < ptr->Y.n_cols; i ++) {
+        OffsetT offset;
+        for (int j = 0; j < ptr->Y.n_rows; j ++)
+            if (!isnan(ptr->Y(j, i)))
+                offset.push_back(j);
+        
+        indivOffsets.push_back(std::move(offset));
+        Piotses.push_back(makePtois(deflateMat(ptr->iots, i, false)));
+    }
+}
+
+template<>
+BalanceManager<true>::BalanceManager(GPanelMAP *ptr_): ptr(ptr_) {
+    defaultPtois = makePtois(ptr->tois);
+    defaultPiots = makePiots(ptr->iots);
+}
+
+template<> const arma::mat&
+BalanceManager<false>::getPtois(int indiv) {
+    return Ptoises[indiv];
+}
+template<> const arma::mat&
+BalanceManager<true>::getPtois(int _) {
+    return defaultPtois;
+}
+
+template<> const arma::mat&
+BalanceManager<false>::getPiots(int time) {
+    return Ptoises[time];
+}
+
+template<> const arma::mat&
+BalanceManager<true>::getPiots(int _) {
+    return defaultPiots;
+}
+
+template<bool IsBalanced>
+void BalanceManager<IsBalanced>::MAP() {
+    arma::cube data = arma::join_slices(ptr->Y, ptr->X);
     arma::cube copy;
     
     do {
         copy = data;
         
         for (int i = 0; i < data.n_slices; i ++) {
-            arma::mat panel = data.slice(i);
+            arma::mat& panel = data.slice(i);
             
-            for (int j = 0; j < indivCount; j ++) {
-                arma::colvec col = panel.col(j);
-                double delta = arma::as_scalar(timeRegressors * col);
-                panel.col(j) -= delta * arma::ones(timeCount);
-            }
+            for (int j = 0; j < ptr->indivCount; j ++)
+                panel.col(j) -= getPtois(j) * panel.col(j);
             
-            for (int j = 0; j < timeCount; j ++) {
-                arma::colvec col = panel.row(j).t();
-                double delta = arma::as_scalar(indivRegressors * col);
-                panel.row(j) -= delta * arma::ones(indivCount);
-            }
+            for (int j = 0; j < ptr->timeCount; j ++)
+                panel.row(j) -= panel.row(j) * getPiots(j);
         }
     } while (arma::accu(abs(data - copy)) > 1e-5);
     
-    Y_ = data.slice(0);
-    X_ = data.slices(1, data.n_slices - 1);
+    ptr->Y = data.slice(0);
+    ptr->X = data.slices(1, data.n_slices - 1);
+}
+
+GPanelMAP::GPanelMAP(arma::cube X, arma::mat Y,
+                     arma::mat tois_, arma::mat iots_,
+                     bool isBalanced, bool withFixedEffects):
+    paramCount(X.n_slices), timeCount(X.n_rows), indivCount(X.n_cols),
+    X(std::move(X)), Y(std::move(Y)),
+    tois(std::move(tois_)), iots(std::move(iots_)),
+    isBalanced(isBalanced)
+{
+    if (withFixedEffects) {
+        tois.insert_cols(0, 1);
+        tois.col(0) = arma::ones(timeCount);
+        
+        iots.insert_cols(0, 1);
+        iots.col(0) = arma::ones(indivCount);
+    }
+}
+
+void GPanelMAP::MAP() {
+    if (isBalanced) {
+        BalanceManager<true> manager(this);
+        manager.MAP();
+    }
+    else {
+        BalanceManager<false> manager(this);
+        manager.MAP();
+    }
 }
 
 arma::colvec GPanelMAP::compute() {
-    buildRegressors();
     MAP();
     
-    const arma::mat matX(X_.memptr(), timeCount * indivCount, paramCount, false);
-    const arma::vec vecY(Y_.memptr(), timeCount * indivCount, 1, false);
+    const arma::mat matX(X.memptr(), timeCount * indivCount, paramCount, false);
+    const arma::colvec vecY(Y.memptr(), timeCount * indivCount, 1, false);
     
     return solve(matX, vecY);
 }
