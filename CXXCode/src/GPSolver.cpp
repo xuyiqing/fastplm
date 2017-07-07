@@ -1,12 +1,12 @@
 #include <vector>
 
-#include "GPanelMAP.h"
+#include "GPSolver.h"
 
 typedef std::vector<arma::uword> OffsetT;
 
 template <bool IsBalanced>
 struct BalanceManager {
-    GPanelMAP *ptr;
+    GPSolver *ptr;
     
     arma::mat defaultPtois;
     arma::mat defaultPiots;
@@ -17,17 +17,20 @@ struct BalanceManager {
     std::vector<OffsetT> indivOffsets;
     
 public:
-    arma::vec deflateVec(const arma::vec& vec, int id, bool byTime = true);
-    arma::mat deflateMat(const arma::mat& mat, int id, bool byTime = true);
-    arma::vec inflateVec(const arma::vec& vec, int id, bool byTime = true);
+    arma::vec deflateVec(const arma::vec& vec, int id, bool byTime);
+    arma::mat deflateMat(const arma::mat& mat, int id, bool byTime);
+    arma::vec inflateVec(const arma::vec& vec, int id, bool byTime);
     
-    BalanceManager(GPanelMAP *ptr);
+    BalanceManager(GPSolver *ptr);
     
     const arma::mat& getPtois(int indiv);
     const arma::mat& getPiots(int time);
     
     void MAP();
 };
+
+const bool kOffsetByTime  = true;
+const bool kOffsetByIndiv = false;
 
 template<> arma::vec
 BalanceManager<false>::deflateVec(const arma::vec& vec, int id, bool byTime) {
@@ -76,11 +79,11 @@ inline arma::mat makePtois(const arma::mat& tois) {
 }
 
 inline arma::mat makePiots(const arma::mat& iots) {
-    return makePtois(iots).t();
+    return makePtois(iots);
 }
 
 template<>
-BalanceManager<false>::BalanceManager(GPanelMAP *ptr_)
+BalanceManager<false>::BalanceManager(GPSolver *ptr_)
 : ptr(ptr_), Ptoises({}), Piotses({}), timeOffsets({}), indivOffsets({})
 {
     for (int i = 0; i < ptr->Y.n_rows; i ++) {
@@ -105,7 +108,7 @@ BalanceManager<false>::BalanceManager(GPanelMAP *ptr_)
 }
 
 template<>
-BalanceManager<true>::BalanceManager(GPanelMAP *ptr_): ptr(ptr_) {
+BalanceManager<true>::BalanceManager(GPSolver *ptr_): ptr(ptr_) {
     defaultPtois = makePtois(ptr->tois);
     defaultPiots = makePiots(ptr->iots);
 }
@@ -140,11 +143,15 @@ void BalanceManager<IsBalanced>::MAP() {
         for (int i = 0; i < data.n_slices; i ++) {
             arma::mat& panel = data.slice(i);
             
-            for (int j = 0; j < ptr->indivCount; j ++)
-                panel.col(j) -= getPtois(j) * panel.col(j);
+            for (int j = 0; j < ptr->indivCount; j ++) {
+                auto col = deflateVec(panel.col(j), j, kOffsetByIndiv);
+                panel.col(j) -= inflateVec(getPtois(j) * col, j, kOffsetByIndiv);
+            }
             
-            for (int j = 0; j < ptr->timeCount; j ++)
-                panel.row(j) -= panel.row(j) * getPiots(j);
+            for (int j = 0; j < ptr->timeCount; j ++) {
+                auto col = deflateVec(panel.row(j).t(), j, kOffsetByTime);
+                panel.row(j) -= inflateVec(getPiots(j) * col, j, kOffsetByTime).t();
+            }
         }
     } while (arma::accu(abs(data - copy)) > 1e-5);
     
@@ -152,7 +159,7 @@ void BalanceManager<IsBalanced>::MAP() {
     ptr->X = data.slices(1, data.n_slices - 1);
 }
 
-GPanelMAP::GPanelMAP(arma::cube X, arma::mat Y,
+GPSolver::GPSolver(arma::cube X, arma::mat Y,
                      arma::mat tois_, arma::mat iots_,
                      bool isBalanced, bool withFixedEffects):
     paramCount(X.n_slices), timeCount(X.n_rows), indivCount(X.n_cols),
@@ -169,7 +176,7 @@ GPanelMAP::GPanelMAP(arma::cube X, arma::mat Y,
     }
 }
 
-void GPanelMAP::MAP() {
+void GPSolver::MAP() {
     if (isBalanced) {
         BalanceManager<true> manager(this);
         manager.MAP();
@@ -180,7 +187,7 @@ void GPanelMAP::MAP() {
     }
 }
 
-arma::colvec GPanelMAP::compute() {
+arma::colvec GPSolver::compute() {
     MAP();
     
     const arma::mat matX(X.memptr(), timeCount * indivCount, paramCount, false);

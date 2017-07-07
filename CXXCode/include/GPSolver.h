@@ -5,7 +5,7 @@
 
 #include "Common.h"
 
-struct GPanelMAP {
+struct GPSolver {
 private:
     const arma::uword paramCount;
     const arma::uword timeCount;
@@ -26,7 +26,7 @@ private:
     friend struct BalanceManager;
     
 public:
-    GPanelMAP(arma::cube X, arma::mat Y, arma::mat tois, arma::mat iots,
+    GPSolver(arma::cube X, arma::mat Y, arma::mat tois, arma::mat iots,
               bool isBalanced = true, bool withFixedEffects = true);
     
     arma::colvec compute();
