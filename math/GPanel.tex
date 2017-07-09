@@ -1,0 +1,95 @@
+\documentclass{tufte-handout}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{braket}
+\usepackage{enumitem}
+  \newenvironment{inlinenum}
+    {\begin{enumerate}
+      [ itemsep    = -1mm
+      , topsep     = -1mm
+      , leftmargin = .5in
+      ]}
+    {\vskip 1mm\end{enumerate}}
+
+\begin{document}
+  \title{Generalized Fixed Effects Model for Panel Data}
+  \author{Minsheng Liu}
+  \maketitle
+
+  \newcommand \Mat[1]{\mathcal{M}_{#1}(\mathbb{R})}
+
+  Consider the following model:
+  \[ y_{t, i} = \vec{x}_{t, i} \cdot \vec{\beta} 
+              + \vec{\phi}_t \cdot \vec{\alpha}_i
+              + \vec{\psi}_i \cdot \vec{\gamma}_t
+              + \epsilon_{i, t} \, , \]
+  where $i$ ranges from $1$ to $n$, $t$ ranges from $1$ to $t$,
+  and $\vec{\beta} \in \mathbb{R}^m$.
+
+  Equivalently, the model can be expressed as
+  \[ \mathbf{Y} = \sum_{i = 1}^m \beta{i} \cdot \mathbf{X}_i
+                + \mathbf{\Phi}\mathbf{A}
+                + (\mathbf{\Psi}\mathbf{\Gamma})^{\top}
+                + \mathbf{E} \, , \]
+  where
+  \begin{inlinenum}
+    \item $\mathbf{Y}, \mathbf{X}_i, \mathbf{E} \in \Mat{i, t}$;
+    \item $\mathbf{\Phi} \in \Mat{t, p}$ is given,
+          $\mathbf{A} \in \Mat{p, i}$ is unknown.
+          They are called as time-observable individual-specific effects (tois);
+    \item $\mathbf{\Psi} \in \Mat{i, q}$ is given,
+          $\mathbf{\Gamma} \in \Mat{q, t}$ is unknown.
+          They are called as individual-observable time-specific effects (iots).
+  \end{inlinenum}
+
+  Note that time andindividual fixed effects can be expressed by adding a column
+  of $1$s in $\Phi$ and $\Psi$, respectively.
+
+  \newcommand \Ptois{\mathbf{P}_{\mathsf{tois}}}
+  \newcommand \Piots{\mathbf{P}_{\mathsf{iots}}}
+  We will apply the method of alternate projections.
+  Let
+  \begin{align*}
+    \Ptois &= \Phi(\Phi^{\top} \Phi)^{-1}\Phi^{\top} \, , \\
+    \Piots &= \Psi(\Psi^{\top} \Psi)^{-1}\Psi^{\top} \, ,
+  \end{align*}
+  be the projection matrices for $\Phi$ and $\Psi$ respectively.
+  Define $\mathsf{tois}: \set{ 1, \hdots, n} \to (\Mat{t, i} \to \Mat{t, i})$
+     and $\mathsf{iots}: \set{ 1, \hdots, t} \to (\Mat{t, i} \to \Mat{t, i})$
+  as follows\footnote{%
+    As in R, we use $\mathbf{M}_{,i}$ to denote the $i$-th column and 
+    $\mathbf{M}_{t,}$ to denote the $t$-th row.
+    The notation $\mathbf{M}[X \mapsto Y]$ means the matrix $M$, with
+    its row or column as specified by $X$ replaced by $Y$.
+
+    Both $\mathsf{tois}$ and $\mathsf{iots}$ are so-called \emph{higher order
+    functions}. Namely, it produces a function $\Mat{t, i} \to \Mat{t, i}$
+    with a given $i$ or $t$.
+  }:
+  \begin{align*}
+    \mathsf{tois}(i)(\mathbf{M}) &=
+      \mathbf{M}[\mathbf{M}_{,i} \mapsto
+        \mathbf{M}_{,i} - \Ptois \mathbf{M}_{,i}] \, , \\
+    \mathsf{iots}(t)(\mathbf{M}) &=
+      \mathbf{M}[\mathbf{M}_{t,} \mapsto
+        \mathbf{M}_{t,} - \mathbf{M}_{t,} \Piots^{\top}] \, .
+  \end{align*}
+  Essentially,
+  $\mathsf{tois}(i, \mathbf{M})$ ``demeans'' the $i$-th column
+  of $\mathbf{M}$---namely the individual $i$;
+  $\mathsf{iots}(t, \mathbf{M})$ ``demeans'' the $t$-th row
+  of $\mathbf{M}$---namely the time $t$.
+
+  For each iteration,
+  let $\mathbf{M}$ range from $\mathbf{Y}, \mathbf{X}_1, \hdots, \mathbf{Y}$.
+  we have
+  \[
+    \hat{\mathbf{M}} = (
+      (\mathsf{iots}(t) \circ \dots \circ \mathsf{iots}(1)) \circ
+      (\mathsf{tois}(n) \circ \dots \circ \mathsf{tois}(1)))(\mathbf{M}) \, .
+  \]
+
+  The algorithm stops after all $\mathbf{M}$ stablizes.
+
+\end{document}
