@@ -9,3 +9,4 @@ build/
 **/.Ruserdata
 **/.Rbuildignore
 **/RcppExports.cpp
+.Rproj.user

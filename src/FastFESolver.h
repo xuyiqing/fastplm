@@ -5,13 +5,13 @@
 #include "FixedEffect.h"
 #include "PlainModel.h"
 
-struct MAP: public PlainModel {
+struct FastFESolver: public PlainModel {
 public:
     enum DemeanTransform {
         kHalperin, kSymmetricHalperin, kCimmino
     };
     
-    MAP(const arma::mat& X, const arma::colvec& Y,
+    FastFESolver(const arma::mat& X, const arma::colvec& Y,
         const std::vector<FixedEffect>& fixedEffects,
         DemeanTransform transform = kHalperin);
     void compute();

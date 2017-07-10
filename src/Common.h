@@ -8,7 +8,7 @@
 
 #include <armadillo>
 
-#elif
+#else
 
 // [[Rcpp::plugins(cpp11)]]
 

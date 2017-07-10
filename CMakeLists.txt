@@ -12,29 +12,20 @@ add_library(FastPLM
   src/Common.h
   src/FixedEffect.h
   src/PlainModel.h
-  src/MAP.h
+  src/FastFESolver.h
   src/GPSolver.h
   src/GradientDescent.h
   src/MatrixReader.h
   src/FixedEffect.cpp
   src/PlainModel.cpp
-  src/MAP.cpp
+  src/FastFESolver.cpp
   src/GPSolver.cpp
   src/GradientDescent.cpp
   src/MatrixReader.cpp
   )
 
-target_compile_definitions(FastPLM PRIVATE BUILD_WITHOUT_R)
+target_compile_definitions(FastPLM PUBLIC BUILD_WITHOUT_R)
 
-# add_executable(
-#  Test-BasicGradientDescent
-#  tests/BasicGradientDescent.cpp
-#  )
+add_executable(Debug debug/Debug.cpp)
 
-# target_link_libraries(
-#  Test-BasicGradientDescent
-#  FastPLM
-#  /usr/local/lib/libarmadillo.dylib
-# )
-
-# add_subdirectory(tests)
+target_link_libraries(Debug FastPLM /usr/local/lib/libarmadillo.dylib)

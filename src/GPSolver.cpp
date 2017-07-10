@@ -4,9 +4,21 @@
 
 typedef std::vector<arma::uword> OffsetT;
 
+template <typename T>
+void deflateMem(const T *src, T *dest, const OffsetT &offset) {
+    for (int i = 0; i < offset.size(); i ++)
+        dest[i] = src[offset[i]];
+}
+
+template <typename T>
+void inflateMem(const T *src, T *dest, const OffsetT &offset) {
+    for (int i = 0; i < offset.size(); i ++)
+        dest[offset[i]] = src[i];
+}
+
 template <bool IsBalanced>
 struct BalanceManager {
-    GPSolver *ptr;
+    GPSolver *solver;
     
     arma::mat defaultPtois;
     arma::mat defaultPiots;
@@ -27,6 +39,9 @@ public:
     const arma::mat& getPiots(int time);
     
     void MAP();
+    
+    void flatenUnbalancedMatrix(const double *src, double *dest);
+    arma::vec flatenAndSolve();
 };
 
 const bool kOffsetByTime  = true;
@@ -36,8 +51,7 @@ template<> arma::vec
 BalanceManager<false>::deflateVec(const arma::vec& vec, int id, bool byTime) {
     const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
     arma::vec vec_(offset.size());
-    for (int i = 0; i < offset.size(); i ++)
-        vec_(i) = vec(offset[i]);
+    deflateMem(vec.memptr(), vec_.memptr(), offset);
     return vec_;
 }
 
@@ -63,9 +77,8 @@ BalanceManager<true>::deflateMat(const arma::mat& mat, int id, bool byTime) {
 template<> arma::vec
 BalanceManager<false>::inflateVec(const arma::vec& vec, int id, bool byTime) {
     const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
-    arma::vec vec_ = arma::zeros(offset[offset.size() - 1] + 1);
-    for (int i = 0; i < offset.size(); i ++)
-        vec_(offset[i]) = vec(i);
+    arma::vec vec_(offset[offset.size() - 1]);
+    inflateMem(vec.memptr(), vec_.memptr(), offset);
     return vec_;
 }
 
@@ -83,34 +96,34 @@ inline arma::mat makePiots(const arma::mat& iots) {
 }
 
 template<>
-BalanceManager<false>::BalanceManager(GPSolver *ptr_)
-: ptr(ptr_), Ptoises({}), Piotses({}), timeOffsets({}), indivOffsets({})
+BalanceManager<false>::BalanceManager(GPSolver *solver_)
+: solver(solver_), Ptoises({}), Piotses({}), timeOffsets({}), indivOffsets({})
 {
-    for (int i = 0; i < ptr->Y.n_rows; i ++) {
+    for (int i = 0; i < solver->Y.n_rows; i ++) {
         OffsetT offset;
-        for (int j = 0; j < ptr->Y.n_cols; j ++)
-            if (!isnan(ptr->Y(i, j)))
+        for (int j = 0; j < solver->Y.n_cols; j ++)
+            if (!isnan(solver->Y(i, j)))
                 offset.push_back(j);
         
         timeOffsets.push_back(std::move(offset));
-        Ptoises.push_back(makePtois(deflateMat(ptr->tois, i, true)));
+        Ptoises.push_back(makePtois(deflateMat(solver->tois, i, true)));
     }
     
-    for (int i = 0; i < ptr->Y.n_cols; i ++) {
+    for (int i = 0; i < solver->Y.n_cols; i ++) {
         OffsetT offset;
-        for (int j = 0; j < ptr->Y.n_rows; j ++)
-            if (!isnan(ptr->Y(j, i)))
+        for (int j = 0; j < solver->Y.n_rows; j ++)
+            if (!isnan(solver->Y(j, i)))
                 offset.push_back(j);
         
         indivOffsets.push_back(std::move(offset));
-        Piotses.push_back(makePtois(deflateMat(ptr->iots, i, false)));
+        Piotses.push_back(makePtois(deflateMat(solver->iots, i, false)));
     }
 }
 
 template<>
-BalanceManager<true>::BalanceManager(GPSolver *ptr_): ptr(ptr_) {
-    defaultPtois = makePtois(ptr->tois);
-    defaultPiots = makePiots(ptr->iots);
+BalanceManager<true>::BalanceManager(GPSolver *ptr_): solver(ptr_) {
+    defaultPtois = makePtois(solver->tois);
+    defaultPiots = makePiots(solver->iots);
 }
 
 template<> const arma::mat&
@@ -134,7 +147,7 @@ BalanceManager<true>::getPiots(int _) {
 
 template<bool IsBalanced>
 void BalanceManager<IsBalanced>::MAP() {
-    arma::cube data = arma::join_slices(ptr->Y, ptr->X);
+    arma::cube data = arma::join_slices(solver->Y, solver->X);
     arma::cube copy;
     
     do {
@@ -143,20 +156,63 @@ void BalanceManager<IsBalanced>::MAP() {
         for (int i = 0; i < data.n_slices; i ++) {
             arma::mat& panel = data.slice(i);
             
-            for (int j = 0; j < ptr->indivCount; j ++) {
+            for (int j = 0; j < solver->indivCount; j ++) {
                 auto col = deflateVec(panel.col(j), j, kOffsetByIndiv);
                 panel.col(j) -= inflateVec(getPtois(j) * col, j, kOffsetByIndiv);
             }
             
-            for (int j = 0; j < ptr->timeCount; j ++) {
+            for (int j = 0; j < solver->timeCount; j ++) {
                 auto col = deflateVec(panel.row(j).t(), j, kOffsetByTime);
                 panel.row(j) -= inflateVec(getPiots(j) * col, j, kOffsetByTime).t();
             }
         }
     } while (arma::accu(abs(data - copy)) > 1e-5);
     
-    ptr->Y = data.slice(0);
-    ptr->X = data.slices(1, data.n_slices - 1);
+    solver->Y = data.slice(0);
+    solver->X = data.slices(1, data.n_slices - 1);
+}
+
+template<bool IsBalanced>
+void BalanceManager<IsBalanced>::flatenUnbalancedMatrix(const double *src, double *dest) {
+    for (const auto &indivOffset : indivOffsets) {
+        deflateMem(src, dest, indivOffset);
+        src += indivOffset.size();
+        dest += solver->timeCount;
+    }
+}
+
+template <> arma::vec
+BalanceManager<false>::flatenAndSolve() {
+    size_t obsCount = 0;
+    for (const auto &xs : timeOffsets)
+        obsCount += xs.size();
+    
+    std::shared_ptr<double> memory(new double[obsCount * (solver->paramCount + 1)],
+                                   std::default_delete<double[]>());
+    
+    double *ptr = memory.get();
+    flatenUnbalancedMatrix(solver->Y.memptr(), ptr);
+    ptr += obsCount;
+    
+    for (int i = 0; i < solver->paramCount; i ++) {
+        flatenUnbalancedMatrix(solver->X.slice(i).memptr(), ptr);
+        ptr += obsCount;
+    }
+    
+    arma::vec vecY(memory.get(),obsCount, 1, false);
+    arma::mat matX(memory.get() + obsCount, obsCount, solver->paramCount, false);
+    
+    return solve(matX, vecY);
+}
+
+template <> arma::vec
+BalanceManager<true>::flatenAndSolve() {
+    auto obsCount = solver->timeCount * solver->indivCount;
+    
+    const arma::mat matX(solver->X.memptr(), obsCount, solver->paramCount, false);
+    const arma::vec vecY(solver->Y.memptr(), obsCount, 1, false);
+    
+    return solve(matX, vecY);
 }
 
 GPSolver::GPSolver(arma::cube X, arma::mat Y,

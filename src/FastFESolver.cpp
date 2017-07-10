@@ -1,18 +1,18 @@
-#include "MAP.h"
+#include "FastFESolver.h"
 #include "GradientDescent.h"
 
-MAP::MAP(const arma::mat& X, const arma::colvec& Y,
+FastFESolver::FastFESolver(const arma::mat& X, const arma::colvec& Y,
          const std::vector<FixedEffect>& fixedEffects,
          DemeanTransform transform):
     PlainModel(X, Y, fixedEffects), transform(transform) {}
 
-void MAP::compute() {
+void FastFESolver::compute() {
     demean();
     estimateParams();
     estimateFixedEffects();
 }
 
-void MAP::demean() {
+void FastFESolver::demean() {
     arma::mat data = arma::join_rows(Y, X);
     arma::mat copy;
     
@@ -37,12 +37,12 @@ void MAP::demean() {
     X_ = data.cols(1, data.n_cols - 1);
 }
 
-void MAP::halperin(arma::mat& data) {
+void FastFESolver::halperin(arma::mat& data) {
     for (const auto& category: fixedEffects)
         demean(data, category);
 }
 
-void MAP::symmetricHalperin(arma::mat& data) {
+void FastFESolver::symmetricHalperin(arma::mat& data) {
     int i = 0;
     for (; i < fixedEffects.size(); i ++)
         demean(data, fixedEffects[i]);
@@ -50,7 +50,7 @@ void MAP::symmetricHalperin(arma::mat& data) {
         demean(data, fixedEffects[i]);
 }
 
-void MAP::demean(arma::mat& data, const FixedEffect& category) {
+void FastFESolver::demean(arma::mat& data, const FixedEffect& category) {
     for (int i = 0; i < category.groupCount; i ++) {
         auto indicator = category.indicator.col(i);
         int count = category.valuesOccurences[i];
@@ -61,7 +61,7 @@ void MAP::demean(arma::mat& data, const FixedEffect& category) {
     }
 }
 
-void MAP::estimateParams() {
+void FastFESolver::estimateParams() {
     // Remove columns of X_ that has no variation.
     std::vector<int> badCols;
     arma::mat goodCols(X_.n_rows, 0);
@@ -91,7 +91,7 @@ void MAP::estimateParams() {
     }
 }
 
-void MAP::estimateFixedEffects() {
+void FastFESolver::estimateFixedEffects() {
     if (fixedEffects.size() == 0) {
         result.effects = std::vector<arma::colvec>();
         return;
