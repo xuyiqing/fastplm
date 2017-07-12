@@ -6,9 +6,6 @@
 
 using namespace std;
 
-
-
-
 void MAP(ifstream &input) {
     int paramCount, timeCount, indivCount;
     input >> paramCount >> timeCount >> indivCount;
@@ -22,11 +19,10 @@ void MAP(ifstream &input) {
     int toisDim, iotsDim;
     input >> toisDim;
     auto toisCoeff = readMatrix(timeCount, toisDim, input, false);
-    cout << toisCoeff << endl;
     input >> iotsDim;
     auto iotsCoeff = readMatrix(indivCount, iotsDim, input, false);
     
-    GPSolver solver(X, Y, toisCoeff, iotsCoeff);
+    GPSolver solver(X, Y, toisCoeff, iotsCoeff, false);
     cout << solver.compute() << endl;
 }
 

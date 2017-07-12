@@ -63,9 +63,10 @@ BalanceManager<true>::deflateVec(const arma::vec& vec, int id, bool byTime) {
 template<> arma::mat
 BalanceManager<false>::deflateMat(const arma::mat& mat, int id, bool byTime) {
     const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
-    arma::mat mat_(mat.n_rows, offset.size());
-    for (int i = 0; i < mat.n_rows; i ++)
-        mat_.row(i) = deflateVec(mat.row(i), id, byTime);
+    arma::mat mat_(offset.size(), mat.n_cols);
+    for (int i = 0; i < mat.n_cols; i ++)
+        mat_.col(i) = deflateVec(mat.col(i), id, byTime);
+    
     return mat_;
 }
 
@@ -77,7 +78,7 @@ BalanceManager<true>::deflateMat(const arma::mat& mat, int id, bool byTime) {
 template<> arma::vec
 BalanceManager<false>::inflateVec(const arma::vec& vec, int id, bool byTime) {
     const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
-    arma::vec vec_(offset[offset.size() - 1]);
+    arma::vec vec_(offset[offset.size() - 1] + 1);
     inflateMem(vec.memptr(), vec_.memptr(), offset);
     return vec_;
 }
@@ -99,6 +100,7 @@ template<>
 BalanceManager<false>::BalanceManager(GPSolver *solver_)
 : solver(solver_), Ptoises({}), Piotses({}), timeOffsets({}), indivOffsets({})
 {
+    // time-indexed offsets for IOTS data
     for (int i = 0; i < solver->Y.n_rows; i ++) {
         OffsetT offset;
         for (int j = 0; j < solver->Y.n_cols; j ++)
@@ -106,9 +108,12 @@ BalanceManager<false>::BalanceManager(GPSolver *solver_)
                 offset.push_back(j);
         
         timeOffsets.push_back(std::move(offset));
-        Ptoises.push_back(makePtois(deflateMat(solver->tois, i, true)));
+        
+        auto mat_ = deflateMat(solver->iots, i, kOffsetByTime);
+        Piotses.push_back(makePiots(mat_));
     }
     
+    // indiv-indexed offsets for TOIS data
     for (int i = 0; i < solver->Y.n_cols; i ++) {
         OffsetT offset;
         for (int j = 0; j < solver->Y.n_rows; j ++)
@@ -116,7 +121,9 @@ BalanceManager<false>::BalanceManager(GPSolver *solver_)
                 offset.push_back(j);
         
         indivOffsets.push_back(std::move(offset));
-        Piotses.push_back(makePtois(deflateMat(solver->iots, i, false)));
+        
+        auto mat_ = deflateMat(solver->tois, i, kOffsetByIndiv);
+        Ptoises.push_back(makePtois(mat_));
     }
 }
 
@@ -137,7 +144,7 @@ BalanceManager<true>::getPtois(int _) {
 
 template<> const arma::mat&
 BalanceManager<false>::getPiots(int time) {
-    return Ptoises[time];
+    return Piotses[time];
 }
 
 template<> const arma::mat&
@@ -157,13 +164,15 @@ void BalanceManager<IsBalanced>::MAP() {
             arma::mat& panel = data.slice(i);
             
             for (int j = 0; j < solver->indivCount; j ++) {
-                auto col = deflateVec(panel.col(j), j, kOffsetByIndiv);
-                panel.col(j) -= inflateVec(getPtois(j) * col, j, kOffsetByIndiv);
+                auto col1 = deflateVec(panel.col(j), j, kOffsetByIndiv);
+                auto col2 = inflateVec(getPtois(j) * col1, j, kOffsetByIndiv);
+                panel.col(j) -= col2;
             }
             
             for (int j = 0; j < solver->timeCount; j ++) {
-                auto col = deflateVec(panel.row(j).t(), j, kOffsetByTime);
-                panel.row(j) -= inflateVec(getPiots(j) * col, j, kOffsetByTime).t();
+                auto col1 = deflateVec(panel.row(j).t(), j, kOffsetByTime);
+                auto col2 = inflateVec(getPiots(j) * col1, j, kOffsetByTime);
+                panel.row(j) -= col2.t();
             }
         }
     } while (arma::accu(abs(data - copy)) > 1e-5);
