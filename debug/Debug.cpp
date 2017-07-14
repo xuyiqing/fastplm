@@ -10,10 +10,10 @@ void MAP(ifstream &input) {
     int paramCount, timeCount, indivCount;
     input >> paramCount >> timeCount >> indivCount;
     
-    auto Y = readMatrix(timeCount, indivCount, input);
+    auto Y = readMatrix(timeCount, indivCount, input, false);
     arma::cube X(timeCount, indivCount, paramCount);
     for (int i = 0; i < paramCount; i ++)
-        X.slice(i) = readMatrix(timeCount, indivCount, input);
+        X.slice(i) = readMatrix(timeCount, indivCount, input, false);
     
     
     int toisDim, iotsDim;

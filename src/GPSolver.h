@@ -29,7 +29,7 @@ public:
     GPSolver(arma::cube X, arma::mat Y, arma::mat tois, arma::mat iots,
               bool isBalanced = true, bool withFixedEffects = true);
     
-    arma::colvec compute();
+    arma::vec compute();
 };
 
 #endif

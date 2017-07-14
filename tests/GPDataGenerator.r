@@ -24,6 +24,21 @@ makeGPData <- function(paramCount = 4,
        toisData = toisData, iotsData = iotsData, toisParams = toisParams, iotsParams = iotsParams)
 }
 
+knockOutGPData <- function(data, missingCellCount) {
+  obsCount <- data$timeCount * data$indivCount
+  missingCellIds <- sample(1:obsCount, missingCellCount)
+  sum <- data$sum
+  
+  for (id in missingCellIds)
+    sum[id] <- NaN
+  
+  data$knockedOutSum <- data$sum[-missingCellIds,]
+  data$knockedOutObservations <- data$observations[-missingCellIds,]
+  data$sum <- sum
+  
+  data
+}
+
 writeGPData <- function(data, path) {
   printMatrix <- function(m) {
     write.table(format(m, justify="right"), row.names=F, col.names=F, quote=F)
@@ -50,3 +65,7 @@ writeGPData <- function(data, path) {
   
   sink()
 }
+
+data <- makeGPData()
+data_ <- knockOutGPData(data, 10)
+

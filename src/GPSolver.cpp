@@ -31,7 +31,7 @@ struct BalanceManager {
 public:
     arma::vec deflateVec(const arma::vec& vec, int id, bool byTime);
     arma::mat deflateMat(const arma::mat& mat, int id, bool byTime);
-    arma::vec inflateVec(const arma::vec& vec, int id, bool byTime);
+    arma::vec inflateVec(const arma::vec& vec, int id, bool byTime, int targetSize = -1);
     
     BalanceManager(GPSolver *ptr);
     
@@ -76,15 +76,17 @@ BalanceManager<true>::deflateMat(const arma::mat& mat, int id, bool byTime) {
 }
 
 template<> arma::vec
-BalanceManager<false>::inflateVec(const arma::vec& vec, int id, bool byTime) {
+BalanceManager<false>::inflateVec(const arma::vec& vec, int id, bool byTime, int targetSize) {
     const auto& offset = byTime ? timeOffsets[id] : indivOffsets[id];
-    arma::vec vec_(offset[offset.size() - 1] + 1);
+    if (targetSize < 0)
+        targetSize = offset[offset.size() - 1] + 1;
+    arma::vec vec_(targetSize);
     inflateMem(vec.memptr(), vec_.memptr(), offset);
     return vec_;
 }
 
 template<> arma::vec
-BalanceManager<true>::inflateVec(const arma::vec& vec, int id, bool byTime) {
+BalanceManager<true>::inflateVec(const arma::vec& vec, int id, bool byTime, int targetSize) {
     return vec;
 }
 
@@ -103,6 +105,7 @@ BalanceManager<false>::BalanceManager(GPSolver *solver_)
     // time-indexed offsets for IOTS data
     for (int i = 0; i < solver->Y.n_rows; i ++) {
         OffsetT offset;
+        
         for (int j = 0; j < solver->Y.n_cols; j ++)
             if (!isnan(solver->Y(i, j)))
                 offset.push_back(j);
@@ -165,13 +168,13 @@ void BalanceManager<IsBalanced>::MAP() {
             
             for (int j = 0; j < solver->indivCount; j ++) {
                 auto col1 = deflateVec(panel.col(j), j, kOffsetByIndiv);
-                auto col2 = inflateVec(getPtois(j) * col1, j, kOffsetByIndiv);
+                auto col2 = inflateVec(getPtois(j) * col1, j, kOffsetByIndiv, solver->timeCount);
                 panel.col(j) -= col2;
             }
             
             for (int j = 0; j < solver->timeCount; j ++) {
                 auto col1 = deflateVec(panel.row(j).t(), j, kOffsetByTime);
-                auto col2 = inflateVec(getPiots(j) * col1, j, kOffsetByTime);
+                auto col2 = inflateVec(getPiots(j) * col1, j, kOffsetByTime, solver->indivCount);
                 panel.row(j) -= col2.t();
             }
         }
@@ -185,16 +188,16 @@ template<bool IsBalanced>
 void BalanceManager<IsBalanced>::flatenUnbalancedMatrix(const double *src, double *dest) {
     for (const auto &indivOffset : indivOffsets) {
         deflateMem(src, dest, indivOffset);
-        src += indivOffset.size();
-        dest += solver->timeCount;
+        dest += indivOffset.size();
+        src += solver->timeCount;
     }
 }
 
 template <> arma::vec
 BalanceManager<false>::flatenAndSolve() {
     size_t obsCount = 0;
-    for (const auto &xs : timeOffsets)
-        obsCount += xs.size();
+    for (const auto &offset : timeOffsets)
+        obsCount += offset.size();
     
     std::shared_ptr<double> memory(new double[obsCount * (solver->paramCount + 1)],
                                    std::default_delete<double[]>());
@@ -208,9 +211,9 @@ BalanceManager<false>::flatenAndSolve() {
         ptr += obsCount;
     }
     
-    arma::vec vecY(memory.get(),obsCount, 1, false);
+    arma::vec vecY(memory.get(), obsCount, 1, false);
     arma::mat matX(memory.get() + obsCount, obsCount, solver->paramCount, false);
-    
+
     return solve(matX, vecY);
 }
 
@@ -241,22 +244,15 @@ GPSolver::GPSolver(arma::cube X, arma::mat Y,
     }
 }
 
-void GPSolver::MAP() {
+arma::vec GPSolver::compute() {
     if (isBalanced) {
         BalanceManager<true> manager(this);
         manager.MAP();
+        return manager.flatenAndSolve();
     }
     else {
         BalanceManager<false> manager(this);
         manager.MAP();
+        return manager.flatenAndSolve();
     }
-}
-
-arma::colvec GPSolver::compute() {
-    MAP();
-    
-    const arma::mat matX(X.memptr(), timeCount * indivCount, paramCount, false);
-    const arma::colvec vecY(Y.memptr(), timeCount * indivCount, 1, false);
-    
-    return solve(matX, vecY);
 }
