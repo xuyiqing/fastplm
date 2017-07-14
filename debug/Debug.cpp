@@ -14,7 +14,7 @@ void MAP(ifstream &input) {
     arma::cube X(timeCount, indivCount, paramCount);
     for (int i = 0; i < paramCount; i ++)
         X.slice(i) = readMatrix(timeCount, indivCount, input, false);
-    
+    std::cout << Y << "\n";
     
     int toisDim, iotsDim;
     input >> toisDim;

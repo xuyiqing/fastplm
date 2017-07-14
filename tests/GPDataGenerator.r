@@ -68,4 +68,6 @@ writeGPData <- function(data, path) {
 
 data <- makeGPData()
 data_ <- knockOutGPData(data, 10)
+writeGPData(data_, "/Users/selveskii/Desktop/data.txt")
+lm(data_$sum ~ data_$observations)
 

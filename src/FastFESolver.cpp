@@ -1,5 +1,5 @@
 #include "FastFESolver.h"
-#include "GradientDescent.h"
+#include "SlowFESolver.h"
 
 FastFESolver::FastFESolver(const arma::mat& X, const arma::colvec& Y,
          const std::vector<FixedEffect>& fixedEffects,
@@ -98,7 +98,7 @@ void FastFESolver::estimateFixedEffects() {
     }
     
     auto residuals = Y - X * result.params;
-    GradientDescent solver(arma::zeros(observationCount, paramCount), residuals, fixedEffects, false);
+    SlowFESolver solver(arma::zeros(observationCount, paramCount), residuals, fixedEffects, false);
     solver.compute();
     result.effects = solver.result.effects;
     result.intercept = solver.result.intercept;

@@ -1,15 +1,15 @@
-#include "GradientDescent.h"
+#include "SlowFESolver.h"
 
-GradientDescent::GradientDescent(const arma::mat& X, const arma::colvec& Y,
+SlowFESolver::SlowFESolver(const arma::mat& X, const arma::colvec& Y,
                                  const std::vector<FixedEffect>& fixedEffects,
                                  bool computeXtXInverse):
     PlainModel(X, Y, fixedEffects, computeXtXInverse) {}
 
-arma::colvec GradientDescent::nextParams(const arma::colvec& partialResidual) {
+arma::colvec SlowFESolver::nextParams(const arma::colvec& partialResidual) {
     return XtXInverse * (X.t() * partialResidual);
 }
 
-arma::colvec GradientDescent::nextFixedEffect(const FixedEffect& effect, const arma::colvec& partialResidual) {
+arma::colvec SlowFESolver::nextFixedEffect(const FixedEffect& effect, const arma::colvec& partialResidual) {
     auto groupCount = effect.groupCount;
 
     arma::colvec next(groupCount);
@@ -21,11 +21,11 @@ arma::colvec GradientDescent::nextFixedEffect(const FixedEffect& effect, const a
     return next;
 }
 
-double GradientDescent::nextIntercept(const arma::colvec& partialResidual) {
+double SlowFESolver::nextIntercept(const arma::colvec& partialResidual) {
     return arma::sum(partialResidual) / observationCount;
 }
 
-arma::colvec GradientDescent::computeResidual(const GradientDescent::Result& result) {
+arma::colvec SlowFESolver::computeResidual(const SlowFESolver::Result& result) {
     arma::colvec residual = Y;
     residual -= X * result.params;
     for (int i = 0; i < fixedEffects.size(); i ++) {
@@ -35,7 +35,7 @@ arma::colvec GradientDescent::computeResidual(const GradientDescent::Result& res
     return residual;
 }
 
-void GradientDescent::compute() {
+void SlowFESolver::compute() {
     auto& current = result;
     current.params = arma::zeros(paramCount);
     current.effects = std::vector<arma::colvec>(fixedEffects.size());
@@ -57,7 +57,7 @@ void GradientDescent::compute() {
     } while (current.computeDiff(last) > 1e-5);
 }
 
-double GradientDescent::Result::computeDiff(const GradientDescent::Result& last) {
+double SlowFESolver::Result::computeDiff(const SlowFESolver::Result& last) {
     double diff = arma::accu(abs(this->params - last.params));
     
     for (int i = 0; i < this->effects.size(); i ++) {

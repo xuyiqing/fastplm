@@ -14,13 +14,13 @@ add_library(FastPLM
   src/PlainModel.h
   src/FastFESolver.h
   src/GPSolver.h
-  src/GradientDescent.h
+  src/SlowFESolver.h
   src/MatrixReader.h
   src/FixedEffect.cpp
   src/PlainModel.cpp
   src/FastFESolver.cpp
   src/GPSolver.cpp
-  src/GradientDescent.cpp
+  src/SlowFESolver.cpp
   src/MatrixReader.cpp
   )
 

@@ -5,7 +5,7 @@
 #include "FixedEffect.h"
 #include "PlainModel.h"
 
-struct GradientDescent: public PlainModel {
+struct SlowFESolver: public PlainModel {
 private:
     arma::colvec nextParams(const arma::colvec&);
     arma::colvec nextFixedEffect(const FixedEffect&, const arma::colvec&);
@@ -13,7 +13,7 @@ private:
     arma::colvec computeResidual(const Result&);
 
 public:
-    GradientDescent(const arma::mat& X, const arma::colvec& Y,
+    SlowFESolver(const arma::mat& X, const arma::colvec& Y,
                     const std::vector<FixedEffect>& fixedEffects,
                     bool computeXtXInverse = true);
     
