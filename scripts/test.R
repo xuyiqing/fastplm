@@ -1,15 +1,8 @@
-
-install.packages("rbenchmark")
-install.packages("lfe")
-install.packages("Rcpp")
-
-setwd("~/Github/fastplm")
-
 ## Simulating FE sample
 
 set.seed(123)
-n <- 1000000
-nlvl <- 20
+n <- 10000
+nlvl <- 5
 x1 <- rnorm(n, 3)
 x2 <- rnorm(n, 3)
 x3 <- rnorm(n, 3)
@@ -42,16 +35,10 @@ d <- cbind.data.frame("id"=1:n, gp, y, x1, x2, x3, x4, x5, gp.eff, e)
 ## speedtest
 library(lfe)
 library(rbenchmark)
+library(fastplm)
 benchmark(
     outFELM    <- felm(y ~ x1 + x2 + x3 + x4 + x5 | gp1 + gp2 + gp3, data = d),
-    outFastPLM <- fastplm(as.matrix(d[,c("y","x1","x2","x3","x4","x5")]), as.matrix(d[,c("gp1","gp2","gp3")])),
+    outFastPLM <- solveFE(as.matrix(d[,c("y","x1","x2","x3","x4","x5")]), as.matrix(d[,c("gp1","gp2","gp3")])),
     order = NULL,
-    replications = 1
+    replications = 100
 )
-
-## results
-## replications elapsed relative user.self sys.self user.child sys.child
-## 1 ols      100   0.789    1.672     0.783    0.005          0         0
-## 2 lfe      100   6.840   14.492     1.613    0.048          0         0
-## 3 ours     100   0.472    1.000     0.472    0.001          0         0
-

@@ -2,14 +2,16 @@
 #include "SlowFESolver.h"
 
 FastFESolver::FastFESolver(const arma::mat& X, const arma::colvec& Y,
-         const std::vector<FixedEffect>& fixedEffects,
-         DemeanTransform transform):
-    PlainModel(X, Y, fixedEffects), transform(transform) {}
+                           const std::vector<FixedEffect>& fixedEffects,
+                           DemeanTransform transform,
+                           bool doesComputeFixedEffects):
+    PlainModel(X, Y, fixedEffects), transform(transform), doesComputeFixedEffects(doesComputeFixedEffects){}
 
 void FastFESolver::compute() {
     demean();
     estimateParams();
-    estimateFixedEffects();
+    if (doesComputeFixedEffects)
+        estimateFixedEffects();
 }
 
 void FastFESolver::demean() {
@@ -64,19 +66,27 @@ void FastFESolver::demean(arma::mat& data, const FixedEffect& category) {
 void FastFESolver::estimateParams() {
     // Remove columns of X_ that has no variation.
     std::vector<int> badCols;
-    arma::mat goodCols(X_.n_rows, 0);
+    
     for (int i = 0; i < X_.n_cols; i ++) {
-        arma::colvec var = arma::unique(X_.col(i));
-        if (var.n_rows == 1)
+        bool noVar = true;
+        double bookmark = X_(0, i);
+        for (int j = 0; j < X_.n_rows; j ++)
+            if (bookmark != X_(j, i)) {
+                noVar = false;
+                break;
+            }
+        
+        if (noVar)
             badCols.push_back(i);
-        else
-            goodCols.insert_cols(goodCols.n_cols, X_.col(i));
     }
     
-    const arma::colvec goodParams = solve(goodCols, Y);
+    for (int i = badCols.size() - 1; i >= 0; i --)
+        X_.shed_col(i);
+    
+    const arma::colvec params = solve(X_, Y);
     
     if (badCols.size() == 0) {
-        result.params = goodParams;
+        result.params = params;
         return;
     }
     
@@ -86,7 +96,7 @@ void FastFESolver::estimateParams() {
             result.params(i) = arma::datum::nan;
             iBad ++;
         } else {
-            result.params(i) = goodParams(iGood ++);
+            result.params(i) = params(iGood ++);
         }
     }
 }

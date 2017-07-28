@@ -12,12 +12,15 @@ public:
     };
     
     FastFESolver(const arma::mat& X, const arma::colvec& Y,
-        const std::vector<FixedEffect>& fixedEffects,
-        DemeanTransform transform = kHalperin);
+                 const std::vector<FixedEffect>& fixedEffects,
+                 DemeanTransform transform = kHalperin,
+                 bool doesComputeFixedEffects = false);
     void compute();
     
 private:
     DemeanTransform transform;
+    
+    const bool doesComputeFixedEffects;
     
     arma::colvec Y_;
     arma::mat X_;

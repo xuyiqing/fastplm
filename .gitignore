@@ -2,6 +2,7 @@ build/
 
 *.o
 *.so
+.DS_Store
 
 **/.Rproj.user/
 **/.Rhistory
@@ -9,4 +10,7 @@ build/
 **/.Ruserdata
 **/.Rbuildignore
 **/RcppExports.cpp
+**/RcppExports.R
 .Rproj.user
+
+debug/Debug.cpp
