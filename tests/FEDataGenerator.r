@@ -2,7 +2,7 @@
 
 work <- function (n) {
     set.seed(123)
-    nlvl <- 5
+    nlvl <- 50
     x1 <- rnorm(n, 3)
     x2 <- rnorm(n, 3)
     x3 <- rnorm(n, 3)

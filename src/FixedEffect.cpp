@@ -24,33 +24,48 @@ FixedEffect FixedEffect::fromColumn(const arma::colvec& column) {
     
     FixedEffect effect;
     effect.groupCount = valueCounters.size();
-    effect.observationCount = column.n_rows;
     
-    effect.valuesOccurences = std::vector<int>(effect.groupCount);
+    effect.groupSizes = std::vector<int>(effect.groupCount);
     std::transform(listOfValueCounters.cbegin(), listOfValueCounters.cend(),
-                   effect.valuesOccurences.begin(),
+                   effect.groupSizes.begin(),
                    [](std::pair<double, int> x) { return x.second; } );
     
-    effect.indices = FixedEffect::Indices();
+    effect.indices = std::unordered_map<double, int>();
     for (int i = 0; i < listOfValueCounters.size(); i ++)
         effect.indices.insert({listOfValueCounters[i].first, i});
     
-    effect.indicators = arma::zeros(column.n_rows, effect.groupCount);
+    effect.column = std::vector<int>();
+    effect.column.reserve(column.n_rows);
     for (int i = 0; i < column.n_rows; i ++) {
         double effectValue = column(i);
-        effect.indicators(i, effect.indices[effectValue]) = 1;
+        effect.column.push_back(effect.indices[effectValue]);
     }
     
     return effect;
 }
 
+std::vector<double> FixedEffect::computeMean(const double* ptr) const {
+    std::vector<double> count(groupCount, 0.0);
+    
+    for (int i = 0; i < column.size(); i ++)
+        count[column[i]] += ptr[i];
+    for (int i = 0; i < groupCount; i ++)
+        count[i] /= static_cast<double>(groupSizes[i]);
+    
+    return count;
+}
+
 void FixedEffect::demean(arma::mat& data) const {
-    for (int i = 0; i < groupCount; i ++) {
-        auto indicator = indicators.col(i);
-        int count = valuesOccurences[i];
-        if (count > 0) {
-            auto means = (indicator.t() * data) / static_cast<double>(count);
-            data -= (indicator * means);
-        }
+    for (int i = 0; i < data.n_cols; i ++) {
+        std::vector<double> count(groupCount, 0.0);
+        
+        double *ptr = data.colptr(i);
+        for (int i = 0; i < column.size(); i ++)
+            count[column[i]] += ptr[i];
+        for (int i = 0; i < groupCount; i ++)
+            count[i] /= static_cast<double>(groupSizes[i]);
+        
+        for (int i = 0; i < column.size(); i ++)
+            ptr[i] -= count[column[i]];
     }
 }

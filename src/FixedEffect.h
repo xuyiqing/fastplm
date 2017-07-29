@@ -6,17 +6,15 @@
 #include "Common.h"
 
 struct FixedEffect {
-    arma::mat indicators;
     arma::uword groupCount;
-    arma::uword observationCount;
-    std::vector<int> valuesOccurences;
-    
-    typedef std::unordered_map<double, int> Indices;
-    Indices indices;
+    std::vector<int> groupSizes;
+    std::vector<int> column;
+    std::unordered_map<double, int> indices;
     
     static FixedEffect fromColumn(const arma::colvec& column);
     void demean(arma::mat& data) const;
-    
+
+    std::vector<double> computeMean(const double* ptr) const;
 private:
     FixedEffect();
 };

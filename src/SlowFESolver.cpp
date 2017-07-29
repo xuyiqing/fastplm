@@ -10,13 +10,8 @@ arma::colvec SlowFESolver::nextParams(const arma::colvec& partialResidual) {
 }
 
 arma::colvec SlowFESolver::nextFixedEffect(const FixedEffect& effect, const arma::colvec& partialResidual) {
-    auto groupCount = effect.groupCount;
-
-    arma::colvec next(groupCount);
-    for (int i = 0; i < groupCount; i ++) {
-        auto sum = arma::dot(effect.indicators.col(i), partialResidual);
-        next(i) = sum / effect.valuesOccurences[i];
-    }
+    auto effects = effect.computeMean(partialResidual.memptr());
+    arma::colvec next(effects);
     next -= (arma::sum(next) / next.n_rows) * arma::ones(next.n_rows);
     return next;
 }
@@ -29,7 +24,8 @@ arma::colvec SlowFESolver::computeResidual(const SlowFESolver::Result& result) {
     arma::colvec residual = Y;
     residual -= X * result.params;
     for (int i = 0; i < fixedEffects.size(); i ++) {
-        residual -= fixedEffects[i].indicators * result.effects[i];
+        for (int j = 0; j < residual.n_rows; j ++)
+            residual(j) -= result.effects[i](fixedEffects[i].column[j]);
     }
     residual -= result.intercept * arma::ones(observationCount);
     return residual;
@@ -50,7 +46,9 @@ void SlowFESolver::compute() {
         arma::colvec residual = computeResidual(last);
         current.params = nextParams(residual + X * last.params);
         for (int i = 0; i < fixedEffects.size(); i ++) {
-            auto partialResidual = residual + fixedEffects[i].indicators * last.effects[i];
+            auto partialResidual = residual;
+            for (int j = 0; j < partialResidual.n_rows; j ++)
+                partialResidual(j) += last.effects[i](fixedEffects[i].column[j]);
             current.effects[i] = nextFixedEffect(fixedEffects[i], partialResidual);
         }
         current.intercept = nextIntercept(residual + last.intercept * arma::ones(observationCount));

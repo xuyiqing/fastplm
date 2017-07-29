@@ -1,8 +1,8 @@
 ## Simulating FE sample
 
 set.seed(123)
-n <- 10000
-nlvl <- 5
+n <- 500000
+nlvl <- 100
 x1 <- rnorm(n, 3)
 x2 <- rnorm(n, 3)
 x3 <- rnorm(n, 3)
@@ -40,5 +40,5 @@ benchmark(
     outFELM    <- felm(y ~ x1 + x2 + x3 + x4 + x5 | gp1 + gp2 + gp3, data = d),
     outFastPLM <- solveFE(as.matrix(d[,c("y","x1","x2","x3","x4","x5")]), as.matrix(d[,c("gp1","gp2","gp3")])),
     order = NULL,
-    replications = 100
+    replications = 10
 )
