@@ -6,7 +6,7 @@
 #include "Common.h"
 
 struct FixedEffect {
-    arma::mat indicator;
+    arma::mat indicators;
     arma::uword groupCount;
     arma::uword observationCount;
     std::vector<int> valuesOccurences;
@@ -15,6 +15,7 @@ struct FixedEffect {
     Indices indices;
     
     static FixedEffect fromColumn(const arma::colvec& column);
+    void demean(arma::mat& data) const;
     
 private:
     FixedEffect();

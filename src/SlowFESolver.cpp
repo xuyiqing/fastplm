@@ -14,7 +14,7 @@ arma::colvec SlowFESolver::nextFixedEffect(const FixedEffect& effect, const arma
 
     arma::colvec next(groupCount);
     for (int i = 0; i < groupCount; i ++) {
-        auto sum = arma::dot(effect.indicator.col(i), partialResidual);
+        auto sum = arma::dot(effect.indicators.col(i), partialResidual);
         next(i) = sum / effect.valuesOccurences[i];
     }
     next -= (arma::sum(next) / next.n_rows) * arma::ones(next.n_rows);
@@ -29,7 +29,7 @@ arma::colvec SlowFESolver::computeResidual(const SlowFESolver::Result& result) {
     arma::colvec residual = Y;
     residual -= X * result.params;
     for (int i = 0; i < fixedEffects.size(); i ++) {
-        residual -= fixedEffects[i].indicator * result.effects[i];
+        residual -= fixedEffects[i].indicators * result.effects[i];
     }
     residual -= result.intercept * arma::ones(observationCount);
     return residual;
@@ -50,7 +50,7 @@ void SlowFESolver::compute() {
         arma::colvec residual = computeResidual(last);
         current.params = nextParams(residual + X * last.params);
         for (int i = 0; i < fixedEffects.size(); i ++) {
-            auto partialResidual = residual + fixedEffects[i].indicator * last.effects[i];
+            auto partialResidual = residual + fixedEffects[i].indicators * last.effects[i];
             current.effects[i] = nextFixedEffect(fixedEffects[i], partialResidual);
         }
         current.intercept = nextIntercept(residual + last.intercept * arma::ones(observationCount));

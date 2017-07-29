@@ -35,11 +35,22 @@ FixedEffect FixedEffect::fromColumn(const arma::colvec& column) {
     for (int i = 0; i < listOfValueCounters.size(); i ++)
         effect.indices.insert({listOfValueCounters[i].first, i});
     
-    effect.indicator = arma::zeros(column.n_rows, effect.groupCount);
+    effect.indicators = arma::zeros(column.n_rows, effect.groupCount);
     for (int i = 0; i < column.n_rows; i ++) {
         double effectValue = column(i);
-        effect.indicator(i, effect.indices[effectValue]) = 1;
+        effect.indicators(i, effect.indices[effectValue]) = 1;
     }
     
     return effect;
+}
+
+void FixedEffect::demean(arma::mat& data) const {
+    for (int i = 0; i < groupCount; i ++) {
+        auto indicator = indicators.col(i);
+        int count = valuesOccurences[i];
+        if (count > 0) {
+            auto means = (indicator.t() * data) / static_cast<double>(count);
+            data -= (indicator * means);
+        }
+    }
 }
