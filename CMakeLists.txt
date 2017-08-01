@@ -10,6 +10,7 @@ include_directories(src)
 
 add_library(FastPLM
   src/Common.h
+  src/CrashQueue.h
   src/FixedEffect.h
   src/PlainModel.h
   src/FastFESolver.h
