@@ -1,5 +1,5 @@
-#ifndef FASTPLM_GPANEL_MAP_H
-#define FASTPLM_GPANEL_MAP_H
+#ifndef FASTPLM_GPSOLVER_H
+#define FASTPLM_GPSOLVER_H
 
 #include <vector>
 

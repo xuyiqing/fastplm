@@ -1,5 +1,5 @@
-#ifndef FIXED_EFFECT_H
-#define FIXED_EFFECT_H
+#ifndef FASTPLM_FIXED_EFFECT_H
+#define FASTPLM_FIXED_EFFECT_H
 
 #include <unordered_map>
 

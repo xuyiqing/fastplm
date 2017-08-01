@@ -1,5 +1,5 @@
-#ifndef FASTPLM_GRADIENT_DESCENT_H
-#define FASTPLM_GRADIENT_DESCENT_H
+#ifndef FASTPLM_SLOW_FESOLVER_H
+#define FASTPLM_SLOW_FESOLVER_H
 
 #include "Common.h"
 #include "FixedEffect.h"
