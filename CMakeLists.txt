@@ -17,6 +17,7 @@ add_library(FastPLM
   src/GPSolver.h
   src/SlowFESolver.h
   src/MatrixReader.h
+  src/CrashQueue.cpp
   src/FixedEffect.cpp
   src/PlainModel.cpp
   src/FastFESolver.cpp

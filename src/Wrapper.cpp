@@ -1,9 +1,13 @@
+#include "CrashQueue.h"
 #include "FastFESolver.h"
 #include "SlowFESolver.h"
 #include "GPSolver.h"
 
 // [[Rcpp::export()]]
-List solveFE(arma::mat rawData, arma::mat rawFixedEffects) {
+List solveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned CORE = 1) {
+  mainQueue = new CrashQueue(CORE);
+  ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
+  
   arma::mat X = rawData.cols(1, rawData.n_cols - 1);
   arma::mat Y = rawData.col(0);
   

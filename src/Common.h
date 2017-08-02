@@ -3,6 +3,17 @@
 
 #include <array>
 #include <vector>
+#include <functional>
+
+class ScopeGuard {
+private:
+    std::function<void()> toCall;
+public:
+    ScopeGuard(std::function<void()> toCall): toCall(toCall) {}
+    ~ScopeGuard() {
+        toCall();
+    }
+};
 
 #ifdef BUILD_WITHOUT_R
 
