@@ -4,8 +4,8 @@
 #include "GPSolver.h"
 
 // [[Rcpp::export()]]
-List solveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned CORE = 1) {
-  mainQueue = new CrashQueue(CORE);
+List solveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1, bool estimateFixedEffects = false) {
+  mainQueue = new CrashQueue(coreNum);
   ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
   
   arma::mat X = rawData.cols(1, rawData.n_cols - 1);
@@ -15,15 +15,17 @@ List solveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned CORE = 1) {
   for (int i = 0; i < rawFixedEffects.n_cols; i ++)
     fixedEffects.push_back(FixedEffect::fromColumn(rawFixedEffects.col(i)));
     
-  FastFESolver solver(X, Y, fixedEffects);
+  FastFESolver solver(X, Y, fixedEffects, estimateFixedEffects);
   solver.compute();
   
   List result;
   result["coefficients"] = solver.result.params;
   result["intercept"] = solver.result.intercept;
-  for (int i = 0; i < solver.result.effects.size(); i ++) {
-    auto effectId = "effect" + std::to_string(i + 1);
-    result[effectId] = solver.result.effects[i];
+  if (estimateFixedEffects) {
+    for (int i = 0; i < solver.result.effects.size(); i ++) {
+      auto effectId = "effect" + std::to_string(i + 1);
+      result[effectId] = solver.result.effects[i];
+    }
   }
   
   return result;
