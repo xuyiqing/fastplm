@@ -40,9 +40,12 @@ testSpeed <- function(n, nlvl, CORE = 1) {
     R2 <- solveFE(as.matrix(d[,c("y","x1","x2","x3","x4")]), as.matrix(d[,c("gp1","gp2","gp3")]), CORE),
     order = NULL,
     replications = 10
-  )
+  )$relative[1]
 }
 
+testSpeed(1000, 40, 2)
+testSpeed(2000, 40, 2)
+testSpeed(4000, 40, 2)
 testSpeed(8000, 40, 2)
 testSpeed(16000, 40, 2)
 testSpeed(32000, 40, 2)

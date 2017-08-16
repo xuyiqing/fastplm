@@ -1,59 +1,14 @@
-> testSpeed(8000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10   0.824   17.167     0.322    0.018          0         0
-2           10   0.048    1.000     0.051    0.012          0         0
-> testSpeed(16000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10   0.968   12.253     0.496    0.016          0         0
-2           10   0.079    1.000     0.087    0.013          0         0
-> testSpeed(32000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10   1.487   10.472     1.041    0.063          0         0
-2           10   0.142    1.000     0.148    0.024          0         0
-> testSpeed(64000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10   2.641    8.953     2.231    0.189          0         0
-2           10   0.295    1.000     0.297    0.056          0         0
-> testSpeed(128000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10   3.897    6.099     3.559    0.358          0         0
-2           10   0.639    1.000     0.647    0.117          0         0
-> testSpeed(256000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10   6.575    5.015     6.537    0.691          0         0
-2           10   1.311    1.000     1.346    0.235          0         0
-> testSpeed(612000, 40, 2)
+The following list gives the relative speed difference between lfe and fastplm, each row represents the case where N (rows of observations) = 2^x*1000.
 
-Timing stopped at: 9.932 1.462 10.22
-> testSpeed(512000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10  10.754    4.123    10.801    1.474          0         0
-2           10   2.608    1.000     2.640    0.585          0         0
-> testSpeed(1024000, 40, 2)
-                                                                                                         test
-1                                               R1 <- felm(y ~ x1 + x2 + x3 + x4 | gp1 + gp2 + gp3, data = d)
-2 R2 <- solveFE(as.matrix(d[, c("y", "x1", "x2", "x3", "x4")]), as.matrix(d[, c("gp1", "gp2", "gp3")]), CORE)
-  replications elapsed relative user.self sys.self user.child sys.child
-1           10  21.983    3.776    21.735    2.949          0         0
-2           10   5.821    1.000     5.641    1.355          0         0
+x	relative
+0	30.25
+1	29.08
+2	23.576
+3	17.78
+4	12.024
+5	10.197
+6	7.74
+7	6.622
+8	5.587
+9	4.719
+10	4.155
