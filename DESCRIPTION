@@ -11,3 +11,5 @@ LazyData: true
 Imports: Rcpp (>= 0.12.9)
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: C++11
+NeedsCompilation: yes
+Packaged: 2017-08-22 03:01:36 UTC; selveskii
