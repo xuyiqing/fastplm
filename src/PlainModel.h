@@ -23,6 +23,8 @@ public:
         arma::colvec params;
         std::vector<arma::colvec> effects;
         double intercept;
+        arma::colvec fittedValues;
+        arma::colvec residuals;
         
         double computeDiff(const Result& last);
     };

@@ -47,22 +47,25 @@ void FastFESolver::estimateParams() {
     for (int i = badCols.size() - 1; i >= 0; i --)
         X_.shed_col(i);
     
-    const arma::colvec params = solve(X_, Y);
+    const arma::colvec params = solve(X_, Y_);
     
     if (badCols.size() == 0) {
         result.params = params;
-        return;
     }
-    
-    result.params = arma::colvec(X.n_cols, 1);
-    for (int i = 0, iBad = 0, iGood = 0; i < paramCount; i ++) {
-        if (i == badCols[iBad]) {
-            result.params(i) = arma::datum::nan;
-            iBad ++;
-        } else {
-            result.params(i) = params(iGood ++);
+    else {
+        result.params = arma::colvec(X.n_cols, 1);
+        for (int i = 0, iBad = 0, iGood = 0; i < paramCount; i ++) {
+            if (i == badCols[iBad]) {
+                result.params(i) = arma::datum::nan;
+                iBad ++;
+            } else {
+                result.params(i) = params(iGood ++);
+            }
         }
     }
+    
+    result.residuals = Y_ - X_ * result.params;
+    result.fittedValues = Y - result.residuals;
 }
 
 void FastFESolver::estimateFixedEffects() {
