@@ -1,7 +1,7 @@
 \name{solveFE}
 \alias{solveFE}
 \title{Fit a linear model with multi-way fixed effects fast}
-\usage{solveFE(data, fixedEffects, coreNum = 1, estimateFixedEffects = FALSE)}
+\usage{solveFE(data, fixedEffects, coreNum = 1, estimateFE = FALSE)}
 
 \description{
   \code{solveFE} solves a linear model with multi-way fixed effects. It works similar to \code{felm} from the \code{felm} package, but performs much faster. Mathematically, we estimate \eqn{\mathbf{\beta}} of the following equation:
@@ -30,7 +30,7 @@
 \value{
   \item{coefficients}{The estimated \eqn{\mathbf{\beta}} as a vector.}
   \item{intercept}{The intercept as a real number.}
-  \item{effectN}{N ranges from 1 to the width of the fixed effects matrix. Each \code{effectN} is a vector representing the estimated fixed effects for the category N. Only present if \code{estimateFixedEffects} is set \code{TRUE}.}
+  \item{FEcoefs}{A list of estimated fixed effects, named by column names of the input \code{fixedEffects}. If some \eqn{N}-th column is not named, the corresponding effect will be named as \code{effectN}. Only present if \code{estimateFixedEffects} is set \code{TRUE}.}
 }
 
 \author{Minsheng Liu}

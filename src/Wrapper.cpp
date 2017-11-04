@@ -4,7 +4,7 @@
 #include "GPSolver.h"
 
 // [[Rcpp::export()]]
-List solveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1, bool estimateFE = false) {
+List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1, bool estimateFE = false) {
   mainQueue = new CrashQueue(coreNum);
   ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
   
@@ -26,10 +26,12 @@ List solveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1,
   if (estimateFE) {
     result["intercept"] = solver.result.intercept;
     
+    List FEcoefs;
     for (int i = 0; i < solver.result.effects.size(); i ++) {
       auto effectId = "effect" + std::to_string(i + 1);
-      result[effectId] = solver.result.effects[i];
+      FEcoefs[effectId] = solver.result.effects[i];
     }
+    result["FEcoefs"] = FEcoefs;
   }
   
   return result;
