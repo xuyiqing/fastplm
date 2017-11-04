@@ -16,3 +16,20 @@ solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
   }
   result
 }
+
+predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {
+  y <- newX %*% model$coefficients + result$intercept + grandMean
+  
+  if (!is.null(FEValues)) {
+    height <- dim(FEValues)[1]
+    width <- dim(FEValues)[2]
+    
+    for (i in 1 : width) {
+      for (j in 1 : height) {
+        y[j] <- y[j] + (model$FEcoefs[[i]])[FEValues[j, i]]
+      }
+    }
+  }
+  
+  y
+}
