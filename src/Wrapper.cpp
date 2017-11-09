@@ -20,7 +20,7 @@ List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned core
   
   List result;
   result["coefficients"] = solver.result.params;
-  result["fittedValues"] = solver.result.fittedValues;
+  result["fitted.values"] = solver.result.fittedValues;
   result["residuals"] = solver.result.residuals;
   
   if (estimateFE) {

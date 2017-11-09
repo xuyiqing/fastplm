@@ -1,5 +1,5 @@
 \name{predictFE}
-\alias{predictEF}
+\alias{predictFE}
 \title{Predict with a linear model with multi-way fixed effects fast}
 \usage{predictFE(model, newX, FEValues = NULL, grandMean = 0)}
 
@@ -57,7 +57,7 @@ d <- cbind.data.frame("id"=1:n, gp, y, x1, x2, x3, x4, gp.eff, e)
 
 ## execute with two cores
 coreNum <- 2
-result <- solveFE(as.matrix(d[,c("y","x1","x2","x3","x4")]), as.matrix(d[,c("gp1","gp2","gp3")]), coreNum)
+result <- solveFE(as.matrix(d[,c("y","x1","x2","x3","x4")]), as.matrix(d[,c("gp1","gp2","gp3")]), coreNum, estimateFE = TRUE)
 
 outcome <- predictFE(result, as.matrix(d[,c("x1","x2","x3","x4")]), as.matrix(d[,c("gp1","gp2","gp3")]))
 }

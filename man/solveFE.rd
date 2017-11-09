@@ -30,6 +30,8 @@
 \value{
   \item{coefficients}{The estimated \eqn{\mathbf{\beta}} as a vector.}
   \item{intercept}{The intercept as a real number.}
+  \item{fitted.values}{The fitted values, namely the result of the estimated linear function applied to the given \eqn{X}.}
+  \item{residuals}{The residuals, namely the given \eqn{Y} minus the fitted values.}
   \item{FEcoefs}{A list of estimated fixed effects, named by column names of the input \code{fixedEffects}. If some \eqn{N}-th column is not named, the corresponding effect will be named as \code{effectN}. Only present if \code{estimateFixedEffects} is set \code{TRUE}.}
 }
 

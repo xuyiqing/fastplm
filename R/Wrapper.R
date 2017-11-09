@@ -18,7 +18,7 @@ solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
 }
 
 predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {
-  y <- newX %*% model$coefficients + result$intercept + grandMean
+  y <- newX %*% model$coefficients + model$intercept + grandMean
   
   if (!is.null(FEValues)) {
     height <- dim(FEValues)[1]
