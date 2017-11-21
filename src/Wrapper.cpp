@@ -8,7 +8,11 @@ List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned core
   mainQueue = new CrashQueue(coreNum);
   ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
   
-  arma::mat X = rawData.cols(1, rawData.n_cols - 1);
+  arma::mat X;
+  if (rawData.n_cols > 1)
+    X = rawData.cols(1, rawData.n_cols - 1);
+  else
+    X = arma::mat(rawData.n_rows, 0);
   arma::mat Y = rawData.col(0);
   
   std::vector<FixedEffect> fixedEffects;

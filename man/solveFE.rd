@@ -14,7 +14,7 @@
 }
 
 \arguments{
-  \item{data}{An augmented matrix with its first column being \eqn{\mathbf{Y}} and remaining columns being \eqn{\mathbf{X}}.}
+  \item{data}{An augmented matrix with its first column being \eqn{\mathbf{Y}} and remaining columns being \eqn{\mathbf{X}}. If your model does not contain covariates (only fixed effects), it is fine not to pass any columns other than \eqn{\mathbf{Y}}.}
   
   \item{fixedEffects}{A matrix records the fixed effects. Its i-th column and j-th row determines which group of the category i does the row j belong to. For instance, if we have three individuals \eqn{1, 2, 3} and time point \eqn{2001, 2002} and organize the data into long form in a time major way (putting rows with the same time point together), we would have a fixed effect matrix of the following form:
   

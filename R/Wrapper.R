@@ -18,6 +18,15 @@ solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
 }
 
 predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {
+  if (is.null(newX)) {
+    if (is.null(FEValues))
+      return("newX and FEValues cannot be both NULL.")
+    newX <- matrix(data = NA, nrow = dim(FEValues)[1], ncol = 0)
+  }
+  
+  if (dim(newX)[2] != dim(model$coefficients)[1])
+    return("incompatible width for input X")
+    
   y <- newX %*% model$coefficients + model$intercept + grandMean
   
   if (!is.null(FEValues)) {
@@ -31,5 +40,5 @@ predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {
     }
   }
   
-  y
+  return(y)
 }

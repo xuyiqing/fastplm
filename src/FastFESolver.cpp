@@ -8,6 +8,7 @@ FastFESolver::FastFESolver(const arma::mat& X, const arma::colvec& Y,
 
 void FastFESolver::compute() {
     demean();
+    Rcout << "after demean\n";
     estimateParams();
     if (doesComputeFixedEffects)
         estimateFixedEffects();
@@ -23,8 +24,12 @@ void FastFESolver::demean() {
             category.demean(data);
     } while (arma::accu(abs(data - copy)) > 1e-5);
     
+    Rcout << "after demean loop\n";
     Y_ = data.col(0);
-    X_ = data.cols(1, data.n_cols - 1);
+    if (data.n_cols > 1)
+      X_ = data.cols(1, data.n_cols - 1);
+    else
+      X_ = arma::mat(data.n_rows, 0);
 }
 
 void FastFESolver::estimateParams() {

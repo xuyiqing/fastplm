@@ -8,7 +8,7 @@
 \arguments{
   \item{model}{The result of a call to \code{solveFE}.}
   
-  \item{newX}{The new \eqn{X}.}
+  \item{newX}{The new \eqn{X}. If your model does not contain covariates (only fixed effects), please pass \code{NULL}. We will check if the width of this matrix equals the width of \eqn{\mathbf{X}} in  your input.}
 
   \item{FEValues}{New group indicators. Note that if the argument is supplied, the result given in \code{model} must have its fixed effects estimated (see more at the documentation for \code{solveFE}.
   
