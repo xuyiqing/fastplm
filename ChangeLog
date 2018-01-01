@@ -1,5 +1,25 @@
 2018-01-01  Minsheng Liu  <lambda@liu.ms>
 
+  Handle group indicators of type "character".
+
+  In "R/Wrapper.R", f the input group indicators are of type "character", 
+  the factor-ed indicators will also be coerced into "character".
+  This change assign each column of the factor-ed indicators into a new
+  variable to avoid the "coercion pollution".
+
+  modified:   R/Wrapper.R
+
+  Add unit test for demeaning fixed effects. We compare
+
+  * the coefficients given by "solveFE" and "felm"
+  * two outputs by "solveFE" supplied with
+    * a group indicators ranging from 1 consecutively to N
+    * some random character-based indicators
+
+  new file:   tests/testthat/test-demean-fixed-effects.R
+
+2018-01-01  Minsheng Liu  <lambda@liu.ms>
+
   Employ "testthat" for unit tests.
 
   modified:   .gitignore
