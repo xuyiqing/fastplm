@@ -1,5 +1,18 @@
 2018-01-01  Minsheng Liu  <lambda@liu.ms>
 
+  Bump the version number to 0.1.5.3 to reflect recent bug fixes.
+
+  Note that previously 0.1.5.2 was released but the git commits are not pushed
+  to the repository so it stayed 0.1.5.1. This change is to avoid conflict when
+  installing this package.
+
+  E-mail address for Minsheng Liu is also updated.
+
+  modified:   DESCRIPTION
+
+
+2018-01-01  Minsheng Liu  <lambda@liu.ms>
+
   Handle group indicators of type "character" for "predictFE".
 
   The bug is the same as the one fixed in commit 628681518ecb8aacabbfc8c24a8a3db4035f7473
