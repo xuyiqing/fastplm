@@ -50,9 +50,11 @@ predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {
   if (!is.null(FEValues)) {
     height <- dim(FEValues)[1]
     width <- dim(FEValues)[2]
+    newFEValues <- matrix(0, height, width)
     
     for (i in 1 : width)
-      FEValues[, i] <- as.numeric(factor(FEValues[, i], levels = model$.group.levels[[i]]))
+      newFEValues[, i] <- as.numeric(factor(FEValues[, i], levels = model$.group.levels[[i]]))
+    FEValues <- newFEValues
 
     for (i in 1 : width) {
       for (j in 1 : height) {

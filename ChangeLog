@@ -1,5 +1,34 @@
 2018-01-01  Minsheng Liu  <lambda@liu.ms>
 
+  Handle group indicators of type "character" for "predictFE".
+
+  The bug is the same as the one fixed in commit 628681518ecb8aacabbfc8c24a8a3db4035f7473
+  (https://github.com/xuyiqing/fastplm/commit/628681518ecb8aacabbfc8c24a8a3db4035f7473).
+  This time it occurs in "predictFE".
+
+  modified:   R/Wrapper.R
+
+  Add unit test for predicting fixed effects. We compare the predicted results
+  using the same X used for "solveFE" with fitted values given by the latter.
+  The following two situations are checked:
+
+  * group indicators ranging from 1 consecutively to N
+  * some random character-based indicators
+
+  new file:   tests/testthat/test-predict-fixed-effects.R
+
+  Functions from
+    tests/testthat/test-demean-fixed-effects.R
+  are abstracted into
+    tests/testthat/make-small-data.R
+  for reusing. Also, group values are renamed as group indicators for consistency.
+
+  new file:   tests/testthat/make-small-data.R
+  modified:   tests/testthat/test-demean-fixed-effects.R
+
+
+2018-01-01  Minsheng Liu  <lambda@liu.ms>
+
   Handle group indicators of type "character".
 
   In "R/Wrapper.R", f the input group indicators are of type "character", 
@@ -13,10 +42,11 @@
 
   * the coefficients given by "solveFE" and "felm"
   * two outputs by "solveFE" supplied with
-    * a group indicators ranging from 1 consecutively to N
+    * group indicators ranging from 1 consecutively to N
     * some random character-based indicators
 
   new file:   tests/testthat/test-demean-fixed-effects.R
+
 
 2018-01-01  Minsheng Liu  <lambda@liu.ms>
 
