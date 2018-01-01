@@ -1,0 +1,10 @@
+2018-01-01  Minsheng Liu  <lambda@liu.ms>
+
+  Employ "testthat" for unit tests.
+
+  modified:   .gitignore
+  modified:   DESCRIPTION
+  modified:   NAMESPACE
+  new file:   R/catch-routine-registration.R
+  new file:   src/test-runner.cpp
+  new file:   tests/testthat.R

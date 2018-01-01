@@ -13,4 +13,6 @@ build/
 **/RcppExports.R
 .Rproj.user
 
+src/symbols.rds
+
 debug/Debug.cpp
