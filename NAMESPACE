@@ -1,3 +1,5 @@
 useDynLib(fastplm, .registration = TRUE)
-exportPattern("^[[:alpha:]]+")
-importFrom(Rcpp, evalCpp)
+export(solveFE)
+export(predictFE)
+export(solveGP)
+importFrom(Rcpp)

@@ -1,4 +1,3 @@
-library(fastplm)
 context("Predict Fixed Effects")
 
 source("make-small-data.R")

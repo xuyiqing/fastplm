@@ -36,32 +36,34 @@ solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
 }
 
 predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {
-  if (is.null(newX)) {
-    if (is.null(FEValues))
-      return("newX and FEValues cannot be both NULL.")
-    newX <- matrix(data = NA, nrow = dim(FEValues)[1], ncol = 0)
-  }
-  
-  if (dim(newX)[2] != dim(model$coefficients)[1])
-    return("incompatible width for input X")
-    
-  y <- newX %*% model$coefficients + model$intercept + grandMean
-  
-  if (!is.null(FEValues)) {
-    height <- dim(FEValues)[1]
-    width <- dim(FEValues)[2]
-    newFEValues <- matrix(0, height, width)
-    
-    for (i in 1 : width)
-      newFEValues[, i] <- as.numeric(factor(FEValues[, i], levels = model$.group.levels[[i]]))
-    FEValues <- newFEValues
+  predict.fixed.effects(model, newX, FEValues)
+}
 
-    for (i in 1 : width) {
-      for (j in 1 : height) {
-        y[j] <- y[j] + (model$FEcoefs[[i]])[FEValues[j, i]]
-      }
-    }
-  }
-  
+predict.fixed.effects <- function(model, x, inds = NULL) {
+  if (is.null(x) && is.null(inds))
+    stop("x and inds cannot both be NULL.")
+
+  if (is.null(x))
+    x <- matrix(data = NA, nrow = ncol(inds), ncol = 0)
+
+  y <- x %*% model$coefficients + model$intercept
+
+  if (is.null(inds))
+    return(y)
+
+  factored.inds <- sapply(1 : ncol(inds),
+    function(col) as.numeric(factor(inds[, col], levels = model$.group.levels[[col]])))
+
+  sapply(which(is.na(factored.inds)), function(i) {
+    col <- (i - 1) %/% nrow(inds) + 1
+    row <- i - (col - 1) * nrow(inds)
+    warning(warning.predict.fixed.effects.with.unknown.indicators(row, col, inds))
+  })
+
+  with.effects <- function(row) sum(sapply(1 : ncol(inds),
+    function(col) (model$FEcoefs[[col]])[factored.inds[row, col]]))
+
+  y <- y + sapply(1 : nrow(inds), with.effects)
+
   return(y)
 }

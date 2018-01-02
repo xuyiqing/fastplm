@@ -1,10 +1,10 @@
-library(lfe)
-library(fastplm)
 context("Demean Fixed Effects")
 
 source("make-small-data.R")
 
 list2env(make.small.data(), environment())
+
+library(lfe)
 
 result.lfe      <- felm(y ~ x | inds[,1] + inds[,2] + inds[,3])
 result.fastplm1 <- solveFE(cbind(y, x), inds)

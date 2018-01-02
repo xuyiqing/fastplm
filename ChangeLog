@@ -1,5 +1,37 @@
 2018-01-02  Minsheng Liu  <lambda@liu.ms>
 
+  "predictFE" now produces a warning when an unknown indicator occurs.
+
+  The logic of "predictFE" is rewritten and moved to "predict.fixed.effects".
+  The new function employs a more canonical R style (more functional, less
+  imperative). The warning message is generated from a function in "messages.R",
+  which makes testing much easier.
+
+  modified:   R/Wrapper.R
+  new file:   R/messages.R
+
+  Export only "solveFE", "solveGP", and "predictFE". All other internal functions
+  are now hidden.
+
+  modified:   NAMESPACE
+
+  Add unit test for "predictFE" with unknown indicators.
+
+  new file:   tests/testthat/test-predict-fixed-effects-with-unknown-indicators.R
+
+  Remove the unnecessary call "library(fastplm)" as "testthat" loads "fastplm"
+  automatically.
+
+  modified:   tests/testthat/test-demean-fixed-effects.R
+  modified:   tests/testthat/test-predict-fixed-effects.R
+
+  Bump the version to 0.1.6.0 to reflect the interface change.
+
+  modified:   DESCRIPTION
+
+
+2018-01-02  Minsheng Liu  <lambda@liu.ms>
+
   Update "test-predict-fixed-effects.R": isomorphic group indicators give equal
   but not identical prediction.
 
