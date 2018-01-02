@@ -21,6 +21,6 @@ test_that("Fitted values should be predicted with originals X where group indica
   expect_equal(model.chars$fitted.values, predicted.chars)
 })
 
-test_that("predictFE should give same results for isomorphic group indicators.", {
-  expect_identical(predicted.1.to.n, predicted.chars)
+test_that("predictFE should give equal results for isomorphic group indicators.", {
+  expect_equal(predicted.1.to.n, predicted.chars)
 })

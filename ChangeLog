@@ -1,8 +1,36 @@
+2018-01-02  Minsheng Liu  <lambda@liu.ms>
+
+  Update "test-predict-fixed-effects.R": isomorphic group indicators give equal
+  but not identical prediction.
+
+  Note that even for isomorphic group indicators, the demeaning process will
+  yield different results due to float point error if the order of group
+  indicators after "factor" differ. The affected test,
+
+    tests/testthat/test-predict-fixed-effects.R
+
+  mistakenly assumed that by changing indicators from 1, 2, ..., N to
+  %prefix%.1, %prefix%.2, ..., %prefix%.N, the order of group indicators after
+  "factor" will remain the same. However, the canonical sorting for strings
+  will yield
+
+    1 > 10 > 11 > ... > 2 > 20 > 21
+
+  rather than
+
+    1 > 2 > ... > 10 > 11 > ... > 20 > 21.
+
+  So the assumption is wrong. As a result, "expect_equal" rather than
+  "expect_identical" should be used.
+
+  modified:   tests/testthat/test-predict-fixed-effects.R
+
+
 2018-01-01  Minsheng Liu  <lambda@liu.ms>
 
   Bump the version number to 0.1.5.3 to reflect recent bug fixes.
 
-  Note that previously 0.1.5.2 was released but the git commits are not pushed
+  Note that previously 0.1.5.2 was released but the git commits were not pushed
   to the repository so it stayed 0.1.5.1. This change is to avoid conflict when
   installing this package.
 
