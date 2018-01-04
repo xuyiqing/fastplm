@@ -1,38 +1,30 @@
 solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
-  groupLevels <- list()
-  if (!is.null(rawFixedEffects)) {
-    height <- dim(rawFixedEffects)[1]
-    width <- dim(rawFixedEffects)[2]
+  solve.fixed.effects(rawData, rawFixedEffects, coreNum, estimateFE)
+}
 
-    newFixedEffects <- matrix(0, height, width)
+solve.fixed.effects <- function(data, inds, core.num = 1, est.FE = FALSE) {
+  if (!is.null(inds)) {
+    N <- ncol(inds)
 
-    for (i in 1 : width) {
-      theFactor <- factor(rawFixedEffects[, i])
-      newFixedEffects[, i] <- as.numeric(theFactor)
-      groupLevels[[i]] <- levels(theFactor)
-    }
-
-    rawFixedEffects <- newFixedEffects
+    factors <- lapply(1 : N, function(col) factor(inds[, col]))
+    group.levels <- lapply(1 : N, function(col) levels(factors[[col]]))
+    factored.inds <- sapply(1 : N, function(col) as.numeric(factors[[col]]))
   }
 
-  result <- internalSolveFE(rawData, rawFixedEffects, coreNum, estimateFE)
+  result <- internalSolveFE(data, factored.inds, core.num, est.FE)
   
-  if (estimateFE) {
-    width <- dim(rawFixedEffects)[2]
-    effectNames <- c()
-    i <- 1
-    while (i <= width) {
-      if (is.null(colnames(rawFixedEffects)[i]))
-        effectNames <- c(effectNames, paste("effect", i, sep = ""))
-      else
-        effectNames <- c(effectNames, colnames(rawFixedEffects)[i])
-      i <- i + 1
-    }
-    names(result$FEcoefs) <- effectNames
+  if (!est.FE)
+    return(result)
 
-    result$.group.levels <- groupLevels
-  }
-  result
+  result$.group.levels <- group.levels
+
+  names(result$FEcoefs) <-
+    if (is.null(colnames(inds)))
+      sapply(1 : ncol(inds), function(col) paste("effect", col, sep = ""))
+    else
+      colnames(inds)
+
+  return(result)
 }
 
 predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {

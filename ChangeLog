@@ -1,6 +1,18 @@
 2018-01-04  Minsheng Liu  <lambda@liu.ms>
 
-  Refactor "FixedEffect::fromColumn"
+  Refactor "solveFE".
+
+  Rewrite the function as "solve.fixed.effects".
+  "solveFE" is kept as a wrapper for backward compatibility.
+
+  modified:   R/Wrapper.R
+
+  There is no behavior change so new tests are not required.
+
+
+2018-01-04  Minsheng Liu  <lambda@liu.ms>
+
+  Refactor "FixedEffect::fromColumn".
 
   Simplify the logic as hashing for indicators is done in R now.
   Also, remove the unused "FixedEffect::indices" instance variable.
