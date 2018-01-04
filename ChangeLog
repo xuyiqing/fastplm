@@ -1,3 +1,16 @@
+2018-01-04  Minsheng Liu  <lambda@liu.ms>
+
+  Remove unnecessary files.
+
+  Delete R Studio project file since R Studio is no longer used,
+
+  deleted:    fastplm.Rproj
+
+  Packaging is done by "devtools" rather than "Makefile".
+
+  modified:   Makefile
+
+
 2018-01-02  Minsheng Liu  <lambda@liu.ms>
 
   "predictFE" now produces a warning when an unknown indicator occurs.
