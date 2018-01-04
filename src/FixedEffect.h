@@ -9,8 +9,7 @@ struct FixedEffect {
     arma::uword groupCount;
     std::vector<int> groupSizes;
     std::vector<int> column;
-    std::unordered_map<double, int> indices;
-    
+
     static FixedEffect fromColumn(const arma::colvec& column);
     void demean(arma::mat& data) const;
 

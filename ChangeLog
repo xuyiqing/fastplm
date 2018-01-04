@@ -1,5 +1,16 @@
 2018-01-04  Minsheng Liu  <lambda@liu.ms>
 
+  Refactor "FixedEffect::fromColumn"
+
+  Simplify the logic as hashing for indicators is done in R now.
+  Also, remove the unused "FixedEffect::indices" instance variable.
+
+  modified:   src/FixedEffect.cpp
+  modified:   src/FixedEffect.h
+
+
+2018-01-04  Minsheng Liu  <lambda@liu.ms>
+
   Remove unnecessary files.
 
   Delete R Studio project file since R Studio is no longer used,

@@ -7,42 +7,24 @@
 FixedEffect::FixedEffect() {}
 
 FixedEffect FixedEffect::fromColumn(const arma::colvec& column) {
-    std::unordered_map<double, int> valueCounters;
+    // We can assume that the column consists of consecutive integers from 1 to N.
+    int groupCount = 0;
     
-    for (double val : column) {
-        auto iter = valueCounters.find(val);
-        if (iter == valueCounters.end())
-            valueCounters.insert({ val, 1 });
-        else
-            iter->second ++;
-    }
-    
-    std::vector<std::pair<double, int>>
-    listOfValueCounters(valueCounters.begin(), valueCounters.end());
-    std::sort(listOfValueCounters.begin(), listOfValueCounters.end(),
-              [](std::pair<double, int> lhs, std::pair<double, int> rhs){
-                  return lhs.first < rhs.first;
-              });
+    for (double val : column)
+        groupCount = std::max(groupCount, static_cast<int>(val));
     
     FixedEffect effect;
-    effect.groupCount = valueCounters.size();
-    
-    effect.groupSizes = std::vector<int>(effect.groupCount);
-    std::transform(listOfValueCounters.cbegin(), listOfValueCounters.cend(),
-                   effect.groupSizes.begin(),
-                   [](std::pair<double, int> x) { return x.second; } );
-    
-    effect.indices = std::unordered_map<double, int>();
-    for (int i = 0; i < listOfValueCounters.size(); i ++)
-        effect.indices.insert({listOfValueCounters[i].first, i});
+    effect.groupCount = groupCount;
     
     effect.column = std::vector<int>();
     effect.column.reserve(column.n_rows);
-    for (int i = 0; i < column.n_rows; i ++) {
-        double effectValue = column(i);
-        effect.column.push_back(effect.indices[effectValue]);
-    }
+    for (int i = 0; i < column.n_rows; i ++)
+        effect.column.push_back(static_cast<int>(column[i]) - 1);
     
+    effect.groupSizes = std::vector<int>(groupCount, 0);
+    for (int val : effect.column)
+        effect.groupSizes[val] ++;
+
     return effect;
 }
 
