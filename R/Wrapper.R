@@ -1,8 +1,8 @@
 solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
-  solve.fixed.effects(rawData, rawFixedEffects, coreNum, estimateFE)
+  solve.fixed.effects(rawData, rawFixedEffects, coreNum)
 }
 
-solve.fixed.effects <- function(data, inds, core.num = 1, est.FE = FALSE) {
+solve.fixed.effects <- function(data, inds, core.num = 1) {
   if (!is.null(inds)) {
     N <- ncol(inds)
 
@@ -11,10 +11,7 @@ solve.fixed.effects <- function(data, inds, core.num = 1, est.FE = FALSE) {
     factored.inds <- sapply(1 : N, function(col) as.numeric(factors[[col]]))
   }
 
-  result <- internalSolveFE(data, factored.inds, core.num, est.FE)
-  
-  if (!est.FE)
-    return(result)
+  result <- internalSolveFE(data, factored.inds, core.num)
 
   result$.group.levels <- group.levels
 
@@ -24,7 +21,7 @@ solve.fixed.effects <- function(data, inds, core.num = 1, est.FE = FALSE) {
     else
       colnames(inds)
 
-  return(result)
+  result
 }
 
 predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {

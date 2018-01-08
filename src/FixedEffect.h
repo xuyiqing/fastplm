@@ -11,7 +11,7 @@ struct FixedEffect {
     std::vector<int> column;
 
     static FixedEffect fromColumn(const arma::colvec& column);
-    void demean(arma::mat& data) const;
+    void demean(arma::mat& data, arma::mat& deltas) const;
 
     std::vector<double> computeMean(const double* ptr) const;
 private:

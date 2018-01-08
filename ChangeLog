@@ -1,3 +1,40 @@
+2018-01-09  Minsheng Liu  <lambda@liu.ms>
+
+  A new algorithm to estimate fixed effects after MAP.
+
+  We use the amount of changes the fixed effects projections applied to X and Y
+  to recover fixed effects. A more detailed description will be provided as a
+  mathematical proof.
+
+  Collect changes of demean:
+
+  modified:   src/FixedEffect.cpp
+  modified:   src/FixedEffect.h
+
+  Reconstruct fixed effects:
+
+  modified:   src/FastFESolver.cpp
+  modified:   src/FastFESolver.h
+
+  "SlowFESolver" is no longer neeeded:
+
+  deleted:    src/SlowFESolver.cpp
+  deleted:    src/SlowFESolver.h
+
+  Since estimating fixed effects requires little computing power, the
+  "estimateFE" attribute will be ignored. The estimation of fixed effects
+  will always happen.
+
+  modified:   R/Wrapper.R
+  modified:   src/Wrapper.cpp
+
+  A more functional code stye is used. Since "make_pair" is used extensively,
+  we now require C++ 14 for its return type deduction feature.
+
+  modified:   CMakeLists.txt
+  modified:   DESCRIPTION
+
+
 2018-01-04  Minsheng Liu  <lambda@liu.ms>
 
   Refactor "solveFE".

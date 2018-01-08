@@ -8,20 +8,28 @@
 struct FastFESolver: public PlainModel {
 public:
     FastFESolver(const arma::mat& X, const arma::colvec& Y,
-                 const std::vector<FixedEffect>& fixedEffects,
-                 bool doesComputeFixedEffects = false);
+                 const std::vector<FixedEffect>& fixedEffects);
     void compute();
-    
+
+    std::vector<arma::mat> deltas;
+
 private:
-    const bool doesComputeFixedEffects;
-    
     arma::colvec Y_;
     arma::mat X_;
-    
+
     void demean();
-    
-    void estimateParams();
-    void estimateFixedEffects();
 };
+
+struct Result {
+    arma::colvec beta;
+    arma::uvec dependents;
+    arma::uvec independents;
+    std::vector<arma::colvec> fixedEffects;
+    arma::colvec residuals;
+    arma::colvec fittedValues;
+    double intercept;
+};
+
+Result estimate(const arma::mat& initData, const arma::mat& projData, const std::vector<arma::mat>& deltas);
 
 #endif

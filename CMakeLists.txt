@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(FastPLM)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(/usr/local/include)
@@ -15,14 +15,12 @@ add_library(FastPLM
   src/PlainModel.h
   src/FastFESolver.h
   src/GPSolver.h
-  src/SlowFESolver.h
   src/MatrixReader.h
   src/CrashQueue.cpp
   src/FixedEffect.cpp
   src/PlainModel.cpp
   src/FastFESolver.cpp
   src/GPSolver.cpp
-  src/SlowFESolver.cpp
   src/MatrixReader.cpp
   )
 

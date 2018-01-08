@@ -41,33 +41,37 @@ std::vector<double> FixedEffect::computeMean(const double* ptr) const {
 
 struct DemeanArgs {
     double* vector;
+    double* delta;
     const std::vector<int>& ids;
     const std::vector<int>& groupSizes;
 
-    DemeanArgs(double* vector, const std::vector<int>& ids, const std::vector<int>& groupSizes)
-    :vector(vector), ids(ids), groupSizes(groupSizes) {}
+    DemeanArgs(double* vector, double* delta, const std::vector<int>& ids, const std::vector<int>& groupSizes)
+    :vector(vector), delta(delta), ids(ids), groupSizes(groupSizes) {}
 };
 
 void demeanColumn(void* ptr) {
     DemeanArgs* casted = static_cast<DemeanArgs*>(ptr);
     auto vector = casted->vector;
+    auto delta = casted->delta;
     auto ids = casted->ids;
     const auto& groupSizes = casted->groupSizes;
     std::vector<double> count(groupSizes.size(), 0.0);
 
     for (int i = 0; i < ids.size(); i ++)
         count[ids[i]] += vector[i];
-    for (int i = 0; i < groupSizes.size(); i ++)
+    for (int i = 0; i < groupSizes.size(); i ++) {
         count[i] /= static_cast<double>(groupSizes[i]);
+        delta[i] += count[i];
+    }
     for (int i = 0; i < ids.size(); i ++)
         vector[i] -= count[ids[i]];
 }
 
-void FixedEffect::demean(arma::mat& data) const {
+void FixedEffect::demean(arma::mat& data, arma::mat& deltas) const {
     std::vector<DemeanArgs> payloads;
     payloads.reserve(data.n_cols);
     for (std::size_t i = 0; i < data.n_cols; i ++)
-        payloads.emplace_back(data.colptr(i), column, groupSizes);
+        payloads.emplace_back(data.colptr(i), deltas.colptr(i), column, groupSizes);
     std::queue<void*> casted;
     for (std::size_t i = 0; i < data.n_cols; i ++)
         casted.push(&payloads[i]);

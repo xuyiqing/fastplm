@@ -1,10 +1,9 @@
 #include "CrashQueue.h"
 #include "FastFESolver.h"
-#include "SlowFESolver.h"
 #include "GPSolver.h"
 
 // [[Rcpp::export()]]
-List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1, bool estimateFE = false) {
+List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1) {
   mainQueue = new CrashQueue(coreNum);
   ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
   
@@ -19,7 +18,7 @@ List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned core
   for (int i = 0; i < rawFixedEffects.n_cols; i ++)
     fixedEffects.push_back(FixedEffect::fromColumn(rawFixedEffects.col(i)));
     
-  FastFESolver solver(X, Y, fixedEffects, estimateFE);
+  FastFESolver solver(X, Y, fixedEffects);
   solver.compute();
   
   List result;
@@ -27,17 +26,15 @@ List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned core
   result["fitted.values"] = solver.result.fittedValues;
   result["residuals"] = solver.result.residuals;
   
-  if (estimateFE) {
-    result["intercept"] = solver.result.intercept;
+  result["intercept"] = solver.result.intercept;
     
-    List FEcoefs;
-    for (int i = 0; i < solver.result.effects.size(); i ++) {
-      auto effectId = "effect" + std::to_string(i + 1);
-      FEcoefs[effectId] = solver.result.effects[i];
-    }
-    result["FEcoefs"] = FEcoefs;
+  List FEcoefs;
+  for (int i = 0; i < solver.result.effects.size(); i ++) {
+    auto effectId = "effect" + std::to_string(i + 1);
+    FEcoefs[effectId] = solver.result.effects[i];
   }
-  
+  result["FEcoefs"] = FEcoefs;
+
   return result;
 }
 
