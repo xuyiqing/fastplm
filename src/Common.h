@@ -26,7 +26,7 @@ const double DOUBLE_TOLERANCE = 1e-5;
 // [[Rcpp::plugins(cpp11)]]
 
 #include <RcppArmadillo.h>
-using namespace Rcpp;
+
 // [[Rcpp::depends(RcppArmadillo)]]
 
 #endif

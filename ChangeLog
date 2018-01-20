@@ -1,5 +1,15 @@
 2018-01-20  Minsheng Liu  <lambda@liu.ms>
 
+  [GARDEN] remove a global "using namespace Rcpp" from "Common.h".
+
+  modified:   src/Common.h
+  modified:   src/Wrapper.cpp
+
+  There is no behavior change so no new test is required.
+
+
+2018-01-20  Minsheng Liu  <lambda@liu.ms>
+
   Move code for the demeaned linear model to a separate class "LinearModel".
 
   We introduce a new class for solving linear models using "arma::solve".

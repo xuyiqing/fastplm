@@ -2,6 +2,8 @@
 #include "FastFESolver.h"
 #include "GPSolver.h"
 
+using Rcpp::List;
+
 // [[Rcpp::export()]]
 List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1) {
   mainQueue = new CrashQueue(coreNum);
@@ -44,9 +46,6 @@ List solveGP(arma::vec Y, arma::mat X, arma::mat tois, arma::mat iots, bool isBa
     arma::mat Y_(Y.memptr(), timeCount, indivCount, false);
     arma::cube X_(X.memptr(), timeCount, indivCount, X.n_cols, false);
     GPSolver solver(X_, Y_, tois, iots, isBalanced);
-    
-    //Rcout << X_ << "\n";
-    Rcout << Y_ << "\n";
     
     List result;
     result["coefficients"] = solver.compute();
