@@ -10,7 +10,7 @@ void FastFESolver::compute() {
     arma::mat projData = arma::join_rows(Y_, X_);
     auto result = estimate(initData, projData, deltas);
     this->result = PlainModel::Result();
-    this->result.params = result.beta;
+    this->result.params = result.projModel.beta;
     this->result.effects = result.fixedEffects;
     this->result.residuals = result.residuals;
     this->result.fittedValues = result.fittedValues;
@@ -35,54 +35,6 @@ void FastFESolver::demean() {
       X_ = data.cols(1, data.n_cols - 1);
     else
       X_ = arma::mat(data.n_rows, 0);
-}
-
-const double DOUBLE_TOLERANCE = 1e-5;
-
-inline bool isZero(const arma::colvec& vec, const double eps = DOUBLE_TOLERANCE) {
-    return arma::all(arma::abs(vec) < eps);
-}
-
-arma::mat orthogonalize(arma::mat mat) {
-    for (auto i = 0u; i < mat.n_cols; i ++) {
-        arma::colvec v = mat.col(i);
-
-        for (auto j = 0u; j < i; j ++)
-            v -= arma::dot(mat.col(j), mat.col(i)) * mat.col(j);
-
-        mat.col(i) = v / arma::norm(v);
-    }
-    return mat;
-}
-
-auto checkLinearDependency(const arma::mat& mat) {
-    auto ortho = orthogonalize(mat);
-
-    arma::colvec dependents = arma::zeros(mat.n_cols);
-    arma::colvec independents = arma::zeros(mat.n_cols);
-
-    for (auto i = 0u; i < mat.n_cols; i ++)
-        if (isZero(ortho.col(i)))
-            dependents[i] = 1;
-        else
-            independents[i] = 1;
-
-    return std::make_pair(arma::find(dependents), arma::find(independents));
-}
-
-inline const arma::colvec getY(const arma::mat& data) {
-    return data.col(0);
-}
-
-inline const arma::mat getX(const arma::mat& data) {
-    return data.cols(1, data.n_cols - 1);
-}
-
-arma::colvec estimateBeta(const arma::mat& data, const arma::uvec& independents) {
-    arma::colvec leanBeta = solve(getX(data).cols(independents), getY(data));
-    arma::colvec fatBeta = arma::zeros(data.n_cols - 1);
-    fatBeta.rows(independents) = leanBeta;
-    return fatBeta;
 }
 
 auto estimateFixedEffects(const std::vector<arma::mat>& deltas, const arma::colvec& beta) {
@@ -115,19 +67,16 @@ inline arma::colvec estimateFittedValues(const arma::mat& initData, const arma::
 }
 
 Result estimate(const arma::mat& initData, const arma::mat& projData, const std::vector<arma::mat>& deltas) {
-    auto tmp0 = checkLinearDependency(getX(projData));
-    arma::uvec dependents = tmp0.first;
-    arma::uvec independents = tmp0.second;
+    auto projModel = LinearModel::solve(projData);
 
     double intercept = 0;
-    auto beta = estimateBeta(projData, independents);
-    auto tmp1 = estimateFixedEffects(deltas, beta);
-    auto fixedEffects = tmp1.first;
-    intercept += tmp1.second;
-    auto tmp2 = estimateResiduals(projData, beta);
-    auto residuals = tmp2.first;
-    intercept += tmp2.second;
+    auto _1 = estimateFixedEffects(deltas, projModel.beta);
+    auto fixedEffects = _1.first;
+    intercept += _1.second;
+    auto _2 = estimateResiduals(projData, projModel.beta);
+    auto residuals = _2.first;
+    intercept += _2.second;
     auto fittedValues = estimateFittedValues(initData, residuals);
 
-    return Result { beta, dependents, independents, fixedEffects, residuals, fittedValues, intercept };
+    return Result { projModel, fixedEffects, residuals, fittedValues, intercept };
 }

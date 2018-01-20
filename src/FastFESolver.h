@@ -4,6 +4,7 @@
 #include "Common.h"
 #include "FixedEffect.h"
 #include "PlainModel.h"
+#include "LinearModel.h"
 
 struct FastFESolver: public PlainModel {
 public:
@@ -21,9 +22,7 @@ private:
 };
 
 struct Result {
-    arma::colvec beta;
-    arma::uvec dependents;
-    arma::uvec independents;
+    LinearModel projModel;
     std::vector<arma::colvec> fixedEffects;
     arma::colvec residuals;
     arma::colvec fittedValues;

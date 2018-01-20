@@ -15,6 +15,8 @@ public:
     }
 };
 
+const double DOUBLE_TOLERANCE = 1e-5;
+
 #ifdef BUILD_WITHOUT_R
 
 #include <armadillo>
@@ -28,4 +30,17 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 #endif
+
+inline bool isZero(const arma::colvec& vec, const double eps = DOUBLE_TOLERANCE) {
+    return arma::all(arma::abs(vec) < eps);
+}
+
+inline const arma::colvec getY(const arma::mat& data) {
+    return data.col(0);
+}
+
+inline const arma::mat getX(const arma::mat& data) {
+    return data.cols(1, data.n_cols - 1);
+}
+
 #endif

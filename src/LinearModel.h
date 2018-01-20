@@ -1,0 +1,37 @@
+#ifndef FASTPLM_LINEAR_MODEL_H
+#define FASTPLM_LINEAR_MODEL_H
+
+#include "Common.h"
+
+struct LinearModel {
+public:
+    arma::mat X;
+    arma::vec Y;
+
+    bool isLinearDependent;
+    arma::uvec dependents, independents;
+    arma::vec beta;
+
+    static const LinearModel solve(const arma::mat& X, const arma::vec& Y);
+    static const LinearModel solve(const arma::mat& data) {
+        return solve(getX(data), getY(data));
+    }
+
+#ifndef BUILD_WITHOUT_R
+    operator Rcpp::List() const {
+        Rcpp::List _;
+        _["X"] = X;
+        _["Y"] = Y;
+        _["is.linear.dependent"] = isLinearDependent;
+        _["dependents"] = dependents;
+        _["independents"] = independents;
+        _["beta"] = beta;
+        return _;
+    }
+#endif
+
+private:
+    LinearModel() {}
+};
+
+#endif

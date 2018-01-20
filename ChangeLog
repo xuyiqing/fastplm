@@ -1,3 +1,26 @@
+2018-01-20  Minsheng Liu  <lambda@liu.ms>
+
+  Move code for the demeaned linear model to a separate class "LinearModel".
+
+  We introduce a new class for solving linear models using "arma::solve".
+  The main change to that function is to check linear dependency from the input.
+
+  modified:   CMakeLists.txt
+  new file:   src/LinearModel.cpp
+  new file:   src/LinearModel.h
+
+  The code is extracted from "FastFESolver.cpp".
+
+  modified:   src/FastFESolver.cpp
+  modified:   src/FastFESolver.h
+
+  We also move some helper functions to "Common.h".
+
+  modified:   src/Common.h
+
+  There is no behavior change so no new test is required.
+
+
 2018-01-09  Minsheng Liu  <lambda@liu.ms>
 
   A new algorithm to estimate fixed effects after MAP.

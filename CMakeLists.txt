@@ -16,12 +16,14 @@ add_library(FastPLM
   src/FastFESolver.h
   src/GPSolver.h
   src/MatrixReader.h
+  src/LinearModel.h
   src/CrashQueue.cpp
   src/FixedEffect.cpp
   src/PlainModel.cpp
   src/FastFESolver.cpp
   src/GPSolver.cpp
   src/MatrixReader.cpp
+  src/LinearModel.cpp
   )
 
 target_compile_definitions(FastPLM PUBLIC BUILD_WITHOUT_R)
