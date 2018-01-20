@@ -13,7 +13,7 @@
 #include <tuple>
 #include <queue>
 
-class CrashQueue {
+class CrushQueue {
 public:
     typedef void* PayloadType;
     typedef std::function<void(PayloadType)> FunctionType;
@@ -32,12 +32,12 @@ private:
 
 public:
     // Turn off Intel HT.
-    CrashQueue(std::size_t threadCount = std::thread::hardware_concurrency() / 2);
-    ~CrashQueue();
+    CrushQueue(std::size_t threadCount = std::thread::hardware_concurrency() / 2);
+    ~CrushQueue();
     void crash();
     void commit(FunctionType&& function, std::queue<PayloadType>&& payloads);
 };
 
-extern CrashQueue* mainQueue;
+extern CrushQueue* mainQueue;
 
 #endif

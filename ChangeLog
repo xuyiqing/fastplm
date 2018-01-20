@@ -1,6 +1,24 @@
 2018-01-20  Minsheng Liu  <lambda@liu.ms>
 
-  [GARDEN] remove a global "using namespace Rcpp" from "Common.h".
+  [GARDEN] Rename "CrashQueue" to "CrushQueue".
+
+  It should be obvious that "CrashQueue" is a typo. I intended to crush those
+  tasks, not to crash during the computation.
+
+  modified:   CMakeLists.txt
+  renamed:    src/CrashQueue.cpp -> src/CrushQueue.cpp
+  renamed:    src/CrashQueue.h -> src/CrushQueue.h
+  modified:   src/FixedEffect.cpp
+  modified:   src/Wrapper.cpp
+
+  Add a test to ensure different core nums yield identical results.
+
+  new file:   tests/testthat/test-parallel-demean-correct.R
+
+
+2018-01-20  Minsheng Liu  <lambda@liu.ms>
+
+  [GARDEN] Remove a global "using namespace Rcpp" from "Common.h".
 
   modified:   src/Common.h
   modified:   src/Wrapper.cpp

@@ -1,4 +1,4 @@
-#include "CrashQueue.h"
+#include "CrushQueue.h"
 #include "FastFESolver.h"
 #include "GPSolver.h"
 
@@ -6,7 +6,7 @@ using Rcpp::List;
 
 // [[Rcpp::export()]]
 List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1) {
-  mainQueue = new CrashQueue(coreNum);
+  mainQueue = new CrushQueue(coreNum);
   ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
   
   arma::mat X;

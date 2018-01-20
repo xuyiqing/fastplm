@@ -1,8 +1,8 @@
-#include "CrashQueue.h"
+#include "CrushQueue.h"
 
-CrashQueue* mainQueue = nullptr;
+CrushQueue* mainQueue = nullptr;
 
-CrashQueue::CrashQueue(std::size_t threadCount): aliveWorkers(threadCount) {
+CrushQueue::CrushQueue(std::size_t threadCount): aliveWorkers(threadCount) {
     for (std::size_t i = 0; i < threadCount; i ++) {
         workers.emplace_back([this]() -> void {
             while (running) {
@@ -30,14 +30,14 @@ CrashQueue::CrashQueue(std::size_t threadCount): aliveWorkers(threadCount) {
     std::unique_lock<std::mutex> lock(taskFetchingMutex);
 }
 
-CrashQueue::~CrashQueue() {
+CrushQueue::~CrushQueue() {
     running = false;
     alarmClock.notify_all();
     for (auto& worker : workers)
         worker.join();
 }
 
-void CrashQueue::crash() {
+void CrushQueue::crash() {
     this->aliveWorkers = workers.size();
     alarmClock.notify_all();
 
@@ -49,8 +49,8 @@ void CrashQueue::crash() {
     }
 }
 
-void CrashQueue::commit(CrashQueue::FunctionType&& function,
-                        std::queue<CrashQueue::PayloadType>&& payloads) {
+void CrushQueue::commit(CrushQueue::FunctionType&& function,
+                        std::queue<CrushQueue::PayloadType>&& payloads) {
     this->function = std::move(function);
     this->payloads = std::move(payloads);
 }
