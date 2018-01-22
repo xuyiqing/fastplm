@@ -13,9 +13,7 @@ public:
     arma::vec beta;
 
     static const LinearModel solve(const arma::mat& X, const arma::vec& Y);
-    static const LinearModel solve(const arma::mat& data) {
-        return solve(getX(data), getY(data));
-    }
+    static const LinearModel solve(const arma::mat& data);
 
 #ifndef BUILD_WITHOUT_R
     operator Rcpp::List() const {
@@ -29,9 +27,6 @@ public:
         return _;
     }
 #endif
-
-private:
-    LinearModel() {}
 };
 
 #endif

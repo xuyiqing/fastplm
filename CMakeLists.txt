@@ -12,15 +12,13 @@ add_library(FastPLM
   src/Common.h
   src/CrushQueue.h
   src/FixedEffect.h
-  src/PlainModel.h
-  src/FastFESolver.h
+  src/FixedEffectModel.h
   src/GPSolver.h
   src/MatrixReader.h
   src/LinearModel.h
   src/CrushQueue.cpp
   src/FixedEffect.cpp
-  src/PlainModel.cpp
-  src/FastFESolver.cpp
+  src/FixedEffectModel.cpp
   src/GPSolver.cpp
   src/MatrixReader.cpp
   src/LinearModel.cpp

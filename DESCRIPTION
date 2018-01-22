@@ -1,7 +1,7 @@
 Package: fastplm
 Type: Package
 Title: Fast Fixed Effect Algorithm
-Version: 0.1.6.0
+Version: 0.1.7.0
 Author: Yiqing Xu, Minsheng Liu
 Maintainer: Yiqing Xu <yiqingxu@ucsd.edu>, Minsheng Liu <lambda@liu.ms>
 Description: Fast solver for panel data with fixed effects.

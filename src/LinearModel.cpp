@@ -46,3 +46,17 @@ const LinearModel LinearModel::solve(const arma::mat& X, const arma::vec& Y) {
     model.beta = fatBeta;
     return model;
 }
+
+const LinearModel LinearModel::solve(const arma::mat& data) {
+    if (data.n_cols > 1)
+        return solve(getX(data), getY(data));
+
+    LinearModel model;
+    model.X = getX(data);
+    model.Y = getY(data);
+    model.isLinearDependent = 0;
+
+    model.dependents = model.dependents = arma::zeros<arma::uvec>(0);
+    model.beta = arma::zeros<arma::vec>(0);
+    return model;
+}

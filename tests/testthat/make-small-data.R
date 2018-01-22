@@ -13,8 +13,9 @@ make.small.data <- function () {
 
   with.effects <- function(j) sapply(1 : N, function(i) effs[inds[i, j], j])
 
-  y <- 7 * x[,1] + 3 * x[,2] + 2 * x[,3] + 5 * x[,4] + 8 * x[,5] + 5 + e +
-       with.effects(1) + with.effects(2) + with.effects(3)
+  beta <- c(7, 3, 2, 5, 8)
+
+  y <- x %*% beta + 5 + e + rowSums(sapply(1 : 3, with.effects))
 
   mget(c("y", "x", "e", "inds", "effs"), environment())
 }

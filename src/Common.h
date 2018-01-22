@@ -40,7 +40,10 @@ inline const arma::colvec getY(const arma::mat& data) {
 }
 
 inline const arma::mat getX(const arma::mat& data) {
-    return data.cols(1, data.n_cols - 1);
+    if (data.n_cols > 1)
+        return data.cols(1, data.n_cols - 1);
+    else
+        return arma::mat( data.n_rows, 0 );
 }
 
 #endif

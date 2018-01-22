@@ -1,3 +1,34 @@
+2018-01-21  Minsheng Liu  <lambda@liu.ms>
+
+  Refactor "FastFESolver" to "FixedEffectModel".
+
+  Similar to the "LinearModel" class before, we now employ a functional approach.
+  Struct is only used for the bundling of final results.
+
+  modified:   CMakeLists.txt
+  modified:   src/Common.h
+  deleted:    src/FastFESolver.h
+  renamed:    src/FastFESolver.cpp -> src/FixedEffectModel.cpp
+  new file:   src/FixedEffectModel.h
+  modified:   src/LinearModel.cpp
+  modified:   src/LinearModel.h
+  deleted:    src/PlainModel.cpp
+  deleted:    src/PlainModel.h
+  modified:   src/Wrapper.cpp
+
+  The demeaned result is now exposed.
+  Bump the version to 0.1.7.0 to reflect the interface change.
+
+  modified:   DESCRIPTION
+
+  Add a test to check the case where X is not present, e.g. using Y and fixed
+  effect indicators to estimate fixed effects. Both the runtime wellness of
+  the program and the correctness of the estimated results are ensured.
+
+  modified:   tests/testthat/make-small-data.R
+  new file:   tests/testthat/test-demean-without-x.R
+
+
 2018-01-20  Minsheng Liu  <lambda@liu.ms>
 
   [GARDEN] Rename "CrashQueue" to "CrushQueue".
