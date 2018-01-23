@@ -26,4 +26,6 @@ change.group.indicators <- function (inds) {
     rename <- function(j) paste(prefixes[[i]], inds[j, i], sep = ".")
     sapply(1 : N, rename)
   })
+  colnames(inds) <- prefixes
+  return(inds)
 }

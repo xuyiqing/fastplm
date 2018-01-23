@@ -10,8 +10,8 @@ test_that("Demean without X should yield fixed effects.", {
   result <- solveFE(as.matrix(y), inds)
 
   sapply(1 : 3, function(i) {
-    expect_equal(result$FEcoefs[[i]],
-                 as.matrix(effs[,i] - mean(effs[,i])))
+    expect_equal(unname(result$FEcoefs[[i]]),
+                 unname(as.matrix(effs[,i] - mean(effs[,i]))))
   })
 
   expect_equal(result$intercept, sum(sapply(1 : 3, function(i) mean(effs[,i]))))

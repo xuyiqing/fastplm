@@ -2,6 +2,19 @@ solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
   solve.fixed.effects(rawData, rawFixedEffects, coreNum)
 }
 
+name.fxied.effects <- function(model, inds) {
+  names(model$FEcoefs) <-
+    if (is.null(colnames(inds)))
+      sapply(1 : ncol(inds), function(col) paste("effect", col, sep = "."))
+    else
+      colnames(inds)
+
+  for (col in 1 : ncol(inds))
+    rownames(model$FEcoefs[[col]]) <- model$.group.levels[[col]]
+
+  model
+}
+
 solve.fixed.effects <- function(data, inds, core.num = 1) {
   if (!is.null(inds)) {
     N <- ncol(inds)
@@ -11,17 +24,11 @@ solve.fixed.effects <- function(data, inds, core.num = 1) {
     factored.inds <- sapply(1 : N, function(col) as.numeric(factors[[col]]))
   }
 
-  result <- internalSolveFE(data, factored.inds, core.num)
+  model <- internalSolveFE(data, factored.inds, core.num)
 
-  result$.group.levels <- group.levels
-
-  names(result$FEcoefs) <-
-    if (is.null(colnames(inds)))
-      sapply(1 : ncol(inds), function(col) paste("effect", col, sep = ""))
-    else
-      colnames(inds)
-
-  result
+  model$.group.levels <- group.levels
+  model <- name.fxied.effects(model, inds)
+  model
 }
 
 predictFE <- function(model, newX, FEValues = NULL, grandMean = 0) {
@@ -43,11 +50,11 @@ predict.fixed.effects <- function(model, x, inds = NULL) {
   factored.inds <- sapply(1 : ncol(inds),
     function(col) as.numeric(factor(inds[, col], levels = model$.group.levels[[col]])))
 
-  sapply(which(is.na(factored.inds)), function(i) {
+  for (i in which(is.na(factored.inds))) {
     col <- (i - 1) %/% nrow(inds) + 1
     row <- i - (col - 1) * nrow(inds)
     warning(warning.predict.fixed.effects.with.unknown.indicators(row, col, inds))
-  })
+  }
 
   with.effects <- function(row) sum(sapply(1 : ncol(inds),
     function(col) (model$FEcoefs[[col]])[factored.inds[row, col]]))

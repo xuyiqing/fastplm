@@ -1,3 +1,20 @@
+2018-01-23  Minsheng Liu  <lambda@liu.ms>
+
+  Add row names to estimated fixed effects.
+
+  modified:   R/Wrapper.R
+
+  Add a test to make sure estimated fixed effects interpreted using row names
+  yield estimated fitted values.
+
+  modified:   tests/testthat/make-small-data.R
+  new file:   tests/testthat/test-fixed-effects-rownames.R
+
+  Add calls to "unname" in "expect_equal" to account for the changed row/col names.
+
+  modified:   tests/testthat/test-demean-without-x.R
+
+
 2018-01-21  Minsheng Liu  <lambda@liu.ms>
 
   Refactor "FastFESolver" to "FixedEffectModel".
