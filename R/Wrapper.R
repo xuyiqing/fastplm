@@ -10,7 +10,7 @@ name.fxied.effects <- function(model, inds) {
       colnames(inds)
 
   for (col in 1 : ncol(inds))
-    rownames(model$FEcoefs[[col]]) <- model$.group.levels[[col]]
+    rownames(model$FEcoefs[[col]]) <- model$group.levels[[col]]
 
   model
 }
@@ -20,13 +20,16 @@ solve.fixed.effects <- function(data, inds, core.num = 1) {
     N <- ncol(inds)
 
     factors <- lapply(1 : N, function(col) factor(inds[, col]))
-    group.levels <- lapply(1 : N, function(col) levels(factors[[col]]))
-    factored.inds <- sapply(1 : N, function(col) as.numeric(factors[[col]]))
+    group.levels <- lapply(factors, levels)
+    group.sizes <- sapply(group.levels, length)
+    factored.inds <- sapply(factors, as.numeric)
   }
 
-  model <- internalSolveFE(data, factored.inds, core.num)
+  cpp.fixed.effects <- CreateFixedEffects(group.sizes, factored.inds)
+  model <- SolveFixedEffects(data, cpp.fixed.effects, core.num)
+  model$cpp.fixed.effects <- cpp.fixed.effects
 
-  model$.group.levels <- group.levels
+  model$group.levels <- group.levels
   model <- name.fxied.effects(model, inds)
   model
 }
@@ -48,7 +51,7 @@ predict.fixed.effects <- function(model, x, inds = NULL) {
     return(y)
 
   factored.inds <- sapply(1 : ncol(inds),
-    function(col) as.numeric(factor(inds[, col], levels = model$.group.levels[[col]])))
+    function(col) as.numeric(factor(inds[, col], levels = model$group.levels[[col]])))
 
   for (i in which(is.na(factored.inds))) {
     col <- (i - 1) %/% nrow(inds) + 1

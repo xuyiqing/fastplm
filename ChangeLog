@@ -1,3 +1,61 @@
+2018-02-10  Minsheng Liu  <lambda@liu.ms>
+
+  [close #10] Refactor to use FixedEffects to manage multiple FixedEffect objects.
+
+  For more background of this commit, see issue #9 and #10 on GitHub.
+
+    https://github.com/xuyiqing/fastplm/issues/9
+    https://github.com/xuyiqing/fastplm/issues/10
+
+  We have revamped "CrushQueue", which hopefully is bug free now.
+  It supports committing payloads during a crush operation,
+  which is required by our new demean algorithm.
+
+  modified:   src/CrushQueue.cpp
+  modified:   src/CrushQueue.h
+
+  "FixedEffect" is most renamed to "SimpleFixedEffect".
+  In near feature, a new class (possibly named as "ComplexFixedEffect")
+  will represent fixed effects interacting with other fixed effects.
+
+  We also have a "FixedEffects" class to manage those effects.
+  The next feature to be done is to integrate component analysis to solve
+  the singleton issue (see #6).
+
+    https://github.com/xuyiqing/fastplm/issues/6
+
+  Thus, an object of "FixedEffects" will be created on R side, passed to our solver, and kept
+  to do component checking by "predict.fixed.effects".
+
+  One thing to note is that "demean" is now a constant method of "FixedEffects".
+  Thus, an object of "FixedEffects" will remain constant once created,
+  which helps to eliminate potential bugs.
+
+  deleted:    src/FixedEffect.cpp
+  deleted:    src/FixedEffect.h
+  new file:   src/FixedEffects.cpp
+  new file:   src/FixedEffects.h
+  modified:   CMakeLists.txt
+
+  Another thing to note is that demean is completely done in "FixedEffects", including
+  convergence checking. This enables us to increase granularity of our parallel model
+  and hence lowers overhead of multi-threading.
+
+  modified:   src/FixedEffectModel.cpp
+  modified:   src/FixedEffectModel.h
+
+  Wrapper files are updated accordingly.
+
+  modified:   R/Wrapper.R
+  modified:   src/Wrapper.cpp
+
+  There is no behavior change so no new test is required.
+  However, the following test is updated to remove the new pointer held in the output
+  so that "expect_identical" could run as desired.
+
+  modified:   tests/testthat/test-parallel-demean-correct.R
+
+
 2018-01-23  Minsheng Liu  <lambda@liu.ms>
 
   Add row names to estimated fixed effects.

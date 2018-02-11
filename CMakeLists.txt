@@ -11,13 +11,13 @@ include_directories(src)
 add_library(FastPLM
   src/Common.h
   src/CrushQueue.h
-  src/FixedEffect.h
+  src/FixedEffects.h
   src/FixedEffectModel.h
   src/GPSolver.h
   src/MatrixReader.h
   src/LinearModel.h
   src/CrushQueue.cpp
-  src/FixedEffect.cpp
+  src/FixedEffects.cpp
   src/FixedEffectModel.cpp
   src/GPSolver.cpp
   src/MatrixReader.cpp

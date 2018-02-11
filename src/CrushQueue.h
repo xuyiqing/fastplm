@@ -20,10 +20,10 @@ public:
 
 private:
     std::vector<std::thread> workers;
-    std::mutex taskFetchingMutex;
-    std::atomic<long> aliveWorkers;
-    std::condition_variable alarmClock;
-    std::condition_variable sleepClock;
+    std::mutex mutex;
+    std::size_t aliveWorkers;
+    std::condition_variable hasJobs;
+    std::condition_variable noJobs;
 
     std::queue<PayloadType> payloads;
     FunctionType function;
@@ -34,8 +34,15 @@ public:
     // Turn off Intel HT.
     CrushQueue(std::size_t threadCount = std::thread::hardware_concurrency() / 2);
     ~CrushQueue();
-    void crash();
+
+    void join() {
+        std::unique_lock<std::mutex> lock(mutex);
+        noJobs.wait(lock, [this](){ return aliveWorkers == 0; });
+    }
+
+    void crush();
     void commit(FunctionType&& function, std::queue<PayloadType>&& payloads);
+    void commit(PayloadType payload);
 };
 
 extern CrushQueue* mainQueue;

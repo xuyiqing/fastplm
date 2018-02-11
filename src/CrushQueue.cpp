@@ -8,12 +8,12 @@ CrushQueue::CrushQueue(std::size_t threadCount): aliveWorkers(threadCount) {
             while (running) {
                 void* payload;
                 {
-                    std::unique_lock<std::mutex> lock(taskFetchingMutex);
+                    std::unique_lock<std::mutex> lock(mutex);
                     if (payloads.empty()) {
-                        aliveWorkers.fetch_sub(1);
-                        sleepClock.notify_one();
-
-                        alarmClock.wait(lock);
+                        aliveWorkers -= 1;
+                        noJobs.notify_one();
+                        hasJobs.wait(lock);
+                        aliveWorkers += 1;
                         continue;
                     }
                     payload = payloads.front();
@@ -25,32 +25,34 @@ CrushQueue::CrushQueue(std::size_t threadCount): aliveWorkers(threadCount) {
         });
     }
 
-    // Make sure all workers finished running.
-    while (aliveWorkers.load() > 0);
-    std::unique_lock<std::mutex> lock(taskFetchingMutex);
+    // Make sure all workers finished initialization.
+    this->join();
 }
 
 CrushQueue::~CrushQueue() {
     running = false;
-    alarmClock.notify_all();
+    hasJobs.notify_all();
     for (auto& worker : workers)
         worker.join();
 }
 
-void CrushQueue::crash() {
-    this->aliveWorkers = workers.size();
-    alarmClock.notify_all();
-
-    while (true) {
-        std::unique_lock<std::mutex> lock(taskFetchingMutex);
-        if (aliveWorkers.load() == 0)
-            break;
-        sleepClock.wait(lock);
-    }
+void CrushQueue::crush() {
+    std::unique_lock<std::mutex> lock(mutex);
+    hasJobs.notify_all();
+    do {
+        noJobs.wait(lock);
+    } while (aliveWorkers > 0);
 }
 
 void CrushQueue::commit(CrushQueue::FunctionType&& function,
                         std::queue<CrushQueue::PayloadType>&& payloads) {
+    this->join();
     this->function = std::move(function);
     this->payloads = std::move(payloads);
+}
+
+void CrushQueue::commit(PayloadType paylod) {
+    std::unique_lock<std::mutex> lock(mutex);
+    payloads.push(paylod);
+    hasJobs.notify_one();
 }

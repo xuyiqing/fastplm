@@ -1,22 +1,5 @@
 #include "FixedEffectModel.h"
 
-auto demean(const arma::mat& initData, const std::vector<FixedEffect>& fixedEffects) {
-    arma::mat data = initData;
-    arma::mat copy;
-    std::vector<arma::mat> deltas;
-
-    for (const auto& category : fixedEffects)
-        deltas.push_back(arma::zeros(category.groupCount, data.n_cols));
-
-    do {
-        copy = data;
-        for (int i = 0; i < fixedEffects.size(); i ++)
-            fixedEffects[i].demean(data, deltas[i]);
-    } while (arma::accu(abs(data - copy)) > 1e-5);
-
-    return std::make_pair(data, deltas);
-}
-
 auto estimateFixedEffects(const std::vector<arma::mat>& deltas, const arma::colvec& beta) {
     std::vector<arma::colvec> fixedEffects;
     fixedEffects.reserve(deltas.size());
@@ -46,12 +29,11 @@ inline arma::colvec estimateFittedValues(const arma::mat& initData, const arma::
     return getY(initData) - residuals;
 }
 
-const FixedEffectModel FixedEffectModel::solve(const arma::mat& initData, const std::vector<FixedEffect>& fixedEffects) {
+const FixedEffectModel FixedEffectModel::solve(const arma::mat& initData, const FixedEffects& fixedEffects) {
     FixedEffectModel model;
 
-    auto _0 = demean(initData, fixedEffects);
-    auto projData = _0.first;
-    auto deltas = _0.second;
+    arma::mat projData = initData;
+    auto deltas = fixedEffects.demean(projData);
     model.demeaned = LinearModel::solve(projData);
 
     model.intercept = 0;

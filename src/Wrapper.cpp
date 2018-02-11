@@ -1,28 +1,24 @@
 #include "CrushQueue.h"
+#include "FixedEffects.h"
 #include "FixedEffectModel.h"
 #include "GPSolver.h"
 
 using Rcpp::List;
+using Rcpp::XPtr;
 
 // [[Rcpp::export()]]
-List internalSolveFE(arma::mat rawData, arma::mat rawFixedEffects, unsigned coreNum = 1) {
-  mainQueue = new CrushQueue(coreNum);
-  ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
-  
-  arma::mat X;
-  if (rawData.n_cols > 1)
-    X = rawData.cols(1, rawData.n_cols - 1);
-  else
-    X = arma::mat(rawData.n_rows, 0);
-  arma::mat Y = rawData.col(0);
-  
-  std::vector<FixedEffect> fixedEffects;
-  for (int i = 0; i < rawFixedEffects.n_cols; i ++)
-    fixedEffects.push_back(FixedEffect::fromColumn(rawFixedEffects.col(i)));
+SEXP CreateFixedEffects(arma::uvec groupSizes, arma::mat indicators) {
+    auto ptr = FixedEffects::create(groupSizes, indicators);
+    return XPtr<const FixedEffects>(ptr.release());
+}
 
-  auto result = FixedEffectModel::solve(rawData, fixedEffects);
-  return static_cast<List>(result);
-  return result;
+// [[Rcpp::export()]]
+List SolveFixedEffects(arma::mat data, SEXP wrappedFixedEffects, std::size_t coreNum = 1) {
+    mainQueue = new CrushQueue(coreNum);
+    ScopeGuard _([]{ delete mainQueue; mainQueue = nullptr; });
+
+    auto fixedEffects = XPtr<const FixedEffects>(wrappedFixedEffects);
+    return FixedEffectModel::solve(data, *fixedEffects);
 }
 
 // [[Rcpp::export()]]
@@ -36,5 +32,3 @@ List solveGP(arma::vec Y, arma::mat X, arma::mat tois, arma::mat iots, bool isBa
     result["coefficients"] = solver.compute();
     return result;
 }
-
-

@@ -2,7 +2,7 @@
 #define FASTPLM_FAST_FESOLVER_H
 
 #include "Common.h"
-#include "FixedEffect.h"
+#include "FixedEffects.h"
 #include "LinearModel.h"
 
 struct FixedEffectModel {
@@ -15,8 +15,8 @@ public:
     arma::vec fittedValues, residuals;
     double intercept;
 
-    static const FixedEffectModel solve(const arma::mat& data, const std::vector<FixedEffect>& fixedEffects);
-    static const FixedEffectModel solve(const arma::mat& X, const arma::vec& Y, const std::vector<FixedEffect>& fixedEffects) {
+    static const FixedEffectModel solve(const arma::mat& data, const FixedEffects& fixedEffects);
+    static const FixedEffectModel solve(const arma::mat& X, const arma::vec& Y, const FixedEffects& fixedEffects) {
         return solve(arma::join_horiz(Y, X), fixedEffects);
     }
 
