@@ -1,3 +1,12 @@
+2018-02-11  Minsheng Liu  <lambda@liu.ms>
+
+  Reorder source files in CMakeLists.txt
+
+  Reorder source files to put C++ header and implementation files together.
+
+  There is no behavior change so no new test is required.
+  
+
 2018-02-10  Minsheng Liu  <lambda@liu.ms>
 
   [close #10] Refactor to use FixedEffects to manage multiple FixedEffect objects.
