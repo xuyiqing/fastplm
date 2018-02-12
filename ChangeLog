@@ -1,6 +1,32 @@
+2018-02-12  Minsheng Liu  <lambda@liu.ms>
+
+  [close #6] Add component analysis in FixedEffects.
+
+  modified:   CMakeLists.txt
+  modified:   R/Wrapper.R
+  modified:   R/messages.R
+  modified:   src/Common.h
+  new file:   src/ComponentAnalysis.cpp
+  new file:   src/ComponentAnalysis.h
+  modified:   src/FixedEffects.cpp
+  modified:   src/FixedEffects.h
+  modified:   src/Wrapper.cpp
+
+  If there is more than one connected component, a warning will be given.
+
+  If during "predictFE" there is any entry involving fixed effects
+  from disconnected components, the predicted result for that entry will be NA
+  and there will be a warning message.
+
+  Add a test for component analysis that tests various warning messages as well as
+  the guaranteed NA output.
+
+  new file:   tests/testthat/test-component-analysis.R
+
+
 2018-02-11  Minsheng Liu  <lambda@liu.ms>
 
-  Reorder source files in CMakeLists.txt
+  Reorder source files in CMakeLists.txt.
 
   Reorder source files to put C++ header and implementation files together.
 

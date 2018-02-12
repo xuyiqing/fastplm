@@ -26,6 +26,9 @@ solve.fixed.effects <- function(data, inds, core.num = 1) {
   }
 
   cpp.fixed.effects <- CreateFixedEffects(group.sizes, factored.inds)
+  if (ContainMultipleComponents(cpp.fixed.effects))
+    warning(warning.contain.multiple.components())
+
   model <- SolveFixedEffects(data, cpp.fixed.effects, core.num)
   model$cpp.fixed.effects <- cpp.fixed.effects
 
@@ -58,6 +61,14 @@ predict.fixed.effects <- function(model, x, inds = NULL) {
     row <- i - (col - 1) * nrow(inds)
     warning(warning.predict.fixed.effects.with.unknown.indicators(row, col, inds))
   }
+
+  cross.components <- CheckComponents(model$cpp.fixed.effects, factored.inds)
+  rows.to.knock.out <- sapply(cross.components, function(error) {
+    warning(warning.cross.component(error, inds, model$group.levels))
+    error$row
+  })
+  if (length(rows.to.knock.out) > 0)
+    factored.inds[rows.to.knock.out, ] <- NA
 
   with.effects <- function(row) sum(sapply(1 : ncol(inds),
     function(col) (model$FEcoefs[[col]])[factored.inds[row, col]]))

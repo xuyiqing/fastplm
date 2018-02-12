@@ -30,7 +30,17 @@ std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& group
         effects->simpleEffects.emplace_back(groupSize, levelSizes, inds);
     }
 
+    effects->componentTables = computeComponents(groupSizes, effects->indicators);
+
     return effects;
+}
+
+std::vector<CrossComponentError> FixedEffects::checkComponents(const arma::mat& indsR) const {
+    auto indsC = convertNumberingRToC(indsR);
+    if (!componentTables)
+        return {};
+
+    return ::checkComponents(*componentTables, indsC);
 }
 
 arma::vec SimpleFixedEffect::demean(arma::subview_col<double> data) const {

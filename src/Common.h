@@ -4,6 +4,10 @@
 #include <array>
 #include <vector>
 #include <functional>
+#include <experimental/optional>
+
+using std::experimental::optional;
+
 
 class ScopeGuard {
 private:

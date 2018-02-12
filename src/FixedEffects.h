@@ -2,6 +2,7 @@
 #define FASTPLM_FIXED_EFFECTS_H
 
 #include "Common.h"
+#include "ComponentAnalysis.h"
 
 struct SimpleFixedEffect {
     std::size_t size;
@@ -19,6 +20,9 @@ public:
     arma::uvec groupSizes;
     arma::umat indicators;
     std::vector<const SimpleFixedEffect> simpleEffects;
+
+    optional<ComponentTables> componentTables;
+    std::vector<CrossComponentError> checkComponents(const arma::mat& indicators) const;
 
     std::vector<arma::mat> demean(arma::mat& data) const;
     static std::unique_ptr<const FixedEffects> create(const arma::uvec& groupSizes, const arma::mat& indicators);

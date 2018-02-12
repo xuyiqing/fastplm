@@ -10,6 +10,8 @@ include_directories(src)
 
 add_library(FastPLM
   src/Common.h
+  src/ComponentAnalysis.h
+  src/ComponentAnalysis.cpp
   src/CrushQueue.h
   src/CrushQueue.cpp
   src/FixedEffects.h
