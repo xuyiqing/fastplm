@@ -1,3 +1,15 @@
+2018-04-03  Minsheng Liu  <lambda@liu.ms>
+
+  [close #11] Give a mathematical description of the model with interacting fixed-effects.
+
+  deleted:    mathematics/GPanel.pdf
+  deleted:    mathematics/GPanel.tex
+  new file:   mathematics/fixed-effects-interacting-across-two-categories.pdf
+  new file:   mathematics/fixed-effects-interacting-across-two-categories.tex
+
+  There is no behavior change so no new test is required.
+
+
 2018-02-12  Minsheng Liu  <lambda@liu.ms>
 
   [close #6] Add component analysis in FixedEffects.
