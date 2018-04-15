@@ -1,5 +1,16 @@
 2018-04-15  Minsheng Liu  <lambda@liu.ms>
 
+  Add or fix header guard.
+
+  modified:   src/ComponentAnalysis.h
+  modified:   src/CrushQueue.h
+  modified:   src/FixedEffectModel.h
+
+  There is no behavior change so no new test is required.
+
+
+2018-04-15  Minsheng Liu  <lambda@liu.ms>
+
   Remove old GPSolver implementation.
 
   modified:   CMakeLists.txt

@@ -1,5 +1,5 @@
-#ifndef FASTPLM_FAST_FESOLVER_H
-#define FASTPLM_FAST_FESOLVER_H
+#ifndef FASTPLM_FIXED_EFFECT_MODEL_H
+#define FASTPLM_FIXED_EFFECT_MODEL_H
 
 #include "Common.h"
 #include "FixedEffects.h"

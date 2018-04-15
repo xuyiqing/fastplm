@@ -1,3 +1,6 @@
+#ifndef FASTPLM_COMPONENT_ANALYSIS_H
+#define FASTPLM_COMPONENT_ANALYSIS_H
+
 #include <unordered_set>
 
 #include "Common.h"
@@ -29,3 +32,5 @@ struct CrossComponentError {
 };
 
 std::vector<CrossComponentError> checkComponents(const ComponentTables& tables, const arma::umat& indicators);
+
+#endif

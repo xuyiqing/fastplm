@@ -1,5 +1,5 @@
-#ifndef FASTPLM_CRASH_QUEUE_H
-#define FASTPLM_CRASH_QUEUE_H
+#ifndef FASTPLM_CRUSH_QUEUE_H
+#define FASTPLM_CRUSH_QUEUE_H
 
 #include <iostream>
 #include <atomic>
