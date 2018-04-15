@@ -1,3 +1,16 @@
+2018-04-15  Minsheng Liu  <lambda@liu.ms>
+
+  Remove old GPSolver implementation.
+
+  modified:   CMakeLists.txt
+  modified:   NAMESPACE
+  deleted:    src/GPSolver.cpp
+  deleted:    src/GPSolver.h
+  modified:   src/Wrapper.cpp
+
+  There is no behavior change so no new test is required.
+
+
 2018-04-03  Minsheng Liu  <lambda@liu.ms>
 
   [close #11] Give a mathematical description of the model with interacting fixed-effects.

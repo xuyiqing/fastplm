@@ -18,8 +18,6 @@ add_library(FastPLM
   src/FixedEffects.cpp
   src/FixedEffectModel.h
   src/FixedEffectModel.cpp
-  src/GPSolver.h
-  src/GPSolver.cpp
   src/MatrixReader.h
   src/MatrixReader.cpp
   src/LinearModel.h

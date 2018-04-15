@@ -1,5 +1,4 @@
 useDynLib(fastplm, .registration = TRUE)
 export(solveFE)
 export(predictFE)
-export(solveGP)
 importFrom(Rcpp)
