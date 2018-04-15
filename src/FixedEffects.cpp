@@ -9,28 +9,28 @@ arma::umat convertNumberingRToC(const arma::mat& indsR) {
     return indsC;
 }
 
-arma::uvec computeLevelSizes(const std::size_t groupSize, const arma::uvec& inds) {
-    arma::uvec levelSizes(groupSize, arma::fill::zeros);
+arma::vec computeLevelSizes(const std::size_t levelCount, const arma::uvec& inds) {
+    arma::vec levelSizes(levelCount, arma::fill::zeros);
     for (auto x : inds)
-        levelSizes[x] ++;
+        levelSizes[x] += 1.0;
     return levelSizes;
 }
 
-std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& groupSizes, const arma::mat& indicators) {
+std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& levelCounts, const arma::mat& indicators) {
     auto effects = std::make_unique<FixedEffects>();
-    effects->size = groupSizes.size();
-    effects->groupSizes = groupSizes;
+    effects->size = levelCounts.size();
+    effects->levelCounts = levelCounts;
     effects->indicators = convertNumberingRToC(indicators);
 
     effects->simpleEffects = std::vector<const SimpleFixedEffect>();
     for (auto i = 0u; i < effects->size; i ++) {
-        auto groupSize = groupSizes[i];
+        auto levelCount = levelCounts[i];
         auto inds = effects->indicators.col(i);
-        auto levelSizes = computeLevelSizes(groupSize, inds);
-        effects->simpleEffects.emplace_back(groupSize, levelSizes, inds);
+        auto levelSizes = computeLevelSizes(levelCount, inds);
+        effects->simpleEffects.emplace_back(levelCount, inds, std::move(levelSizes));
     }
 
-    effects->componentTables = computeComponents(groupSizes, effects->indicators);
+    effects->componentTables = computeComponents(levelCounts, effects->indicators);
 
     return effects;
 }
@@ -41,18 +41,6 @@ std::vector<CrossComponentError> FixedEffects::checkComponents(const arma::mat& 
         return {};
 
     return ::checkComponents(*componentTables, indsC);
-}
-
-arma::vec SimpleFixedEffect::demean(arma::subview_col<double> data) const {
-    arma::vec means = arma::zeros(size);
-    for (auto i = 0u; i < data.n_rows; i ++)
-        means[indicators[i]] += data[i];
-
-    means = means / levelSizes;
-    for (auto i = 0u; i < data.n_rows; i ++)
-        data[i] -= means[indicators[i]];
-
-    return means;
 }
 
 struct Payload {
@@ -67,7 +55,7 @@ struct Payload {
         std::transform(fixedEffects.simpleEffects.begin(),
                        fixedEffects.simpleEffects.end(),
                        std::back_inserter(deltas),
-                       [](auto& x) { return arma::zeros(x.size); });
+                       [](auto& x) { return arma::zeros(x.levelCount); });
     }
 };
 
@@ -103,7 +91,7 @@ std::vector<arma::mat> FixedEffects::demean(arma::mat& data) const {
     std::vector<arma::mat> deltas;
     for (auto i = 0u; i < size; i ++) {
         const auto& effect = simpleEffects[i];
-        arma::mat delta(effect.size, data.n_cols);
+        arma::mat delta(effect.levelCount, data.n_cols);
         for (auto j = 0u; j < data.n_cols; j ++)
             delta.col(j) = payloads[j]->deltas[i];
         deltas.emplace_back(std::move(delta));

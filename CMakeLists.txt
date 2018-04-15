@@ -14,6 +14,8 @@ add_library(FastPLM
   src/ComponentAnalysis.cpp
   src/CrushQueue.h
   src/CrushQueue.cpp
+  src/FixedEffect.h
+  src/FixedEffect.cpp
   src/FixedEffects.h
   src/FixedEffects.cpp
   src/FixedEffectModel.h

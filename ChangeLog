@@ -1,5 +1,43 @@
 2018-04-15  Minsheng Liu  <lambda@liu.ms>
 
+  Refactor "SimpleFixedEffect" to allow generalized fixed effects in the future.
+
+  See issue #11 for more information.
+
+    https://github.com/xuyiqing/fastplm/issues/11
+
+  Generalized fixed effects have a similar demean procedure. Two differences:
+
+  1. It requires weighted summation onto a higher-dimension matrices rather than
+     plain summation onto a vector.
+  2. Normalization takes a matrix rather than a real number.
+
+  Thus, we introduce a generic "FixedEffect" class with specialized members
+  to reduce code duplication:
+
+  modified:   CMakeLists.txt
+  new file:   src/FixedEffect.cpp
+  new file:   src/FixedEffect.h
+  modified:   src/FixedEffects.cpp
+  modified:   src/FixedEffects.h
+
+  "computeLevelSizes" now returns a double vector, since the result will only be
+  used in element-wise division with another double vector.
+
+  modified:   src/FixedEffects.cpp
+
+  We also rename all "group" to "level" in C++ code, except in "ComponentAnalysis.cpp".
+  The exception is because in that file, some C++ fields are converted directly
+  to R, and in R we do use "group" for backward compatibility.
+
+  modified:   src/FixedEffects.cpp
+  modified:   src/FixedEffects.h
+
+  There is no behavior change so no new test is required.
+
+
+2018-04-15  Minsheng Liu  <lambda@liu.ms>
+
   Add or fix header guard.
 
   modified:   src/ComponentAnalysis.h
