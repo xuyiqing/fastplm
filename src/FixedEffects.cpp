@@ -16,21 +16,17 @@ arma::vec computeLevelSizes(const std::size_t levelCount, const arma::uvec& inds
     return levelSizes;
 }
 
-std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& levelCounts, const arma::mat& indicators) {
+std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& levelCounts, const arma::mat& indsR) {
     auto effects = std::make_unique<FixedEffects>();
     effects->size = levelCounts.size();
-    effects->levelCounts = levelCounts;
-    effects->indicators = convertNumberingRToC(indicators);
+    effects->indicators = createIndicators(levelCounts, indsR);
 
-    effects->simpleEffects = std::vector<const SimpleFixedEffect>();
-    for (auto i = 0u; i < effects->size; i ++) {
-        auto levelCount = levelCounts[i];
-        auto inds = effects->indicators.col(i);
-        auto levelSizes = computeLevelSizes(levelCount, inds);
-        effects->simpleEffects.emplace_back(levelCount, inds, std::move(levelSizes));
-    }
+    effects->simpleEffects = std::vector<SimpleFixedEffect>();
+    for (auto i = 0u; i < effects->size; i ++)
+        effects->simpleEffects.emplace_back(effects->indicators[i], std::move(singleton));
 
-    effects->componentTables = computeComponents(levelCounts, effects->indicators);
+    auto indsC = convertNumberingRToC(indsR);
+    effects->componentTables = computeComponents(levelCounts, indsC);
 
     return effects;
 }
@@ -55,7 +51,7 @@ struct Payload {
         std::transform(fixedEffects.simpleEffects.begin(),
                        fixedEffects.simpleEffects.end(),
                        std::back_inserter(deltas),
-                       [](auto& x) { return arma::zeros(x.levelCount); });
+                       [](auto& x) { return arma::zeros(x.indicator.levelCount); });
     }
 };
 
@@ -91,7 +87,7 @@ std::vector<arma::mat> FixedEffects::demean(arma::mat& data) const {
     std::vector<arma::mat> deltas;
     for (auto i = 0u; i < size; i ++) {
         const auto& effect = simpleEffects[i];
-        arma::mat delta(effect.levelCount, data.n_cols);
+        arma::mat delta(effect.indicator.levelCount, data.n_cols);
         for (auto j = 0u; j < data.n_cols; j ++)
             delta.col(j) = payloads[j]->deltas[i];
         deltas.emplace_back(std::move(delta));

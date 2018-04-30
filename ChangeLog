@@ -1,3 +1,27 @@
+2018-04-30  Minsheng Liu  <lambda@liu.ms>
+
+  Add an "Indicator" class.
+
+  The objective is to simplify the code. From a performance perspective,
+  "Indicator" holds the intermediate computation result "levelSizes",
+  though this might be a premature optimization concern.
+
+  modified:   CMakeLists.txt
+  modified:   src/FixedEffect.h
+  new file:   src/Indicator.cpp
+  new file:   src/Indicator.h
+
+  It seems that "std::vector" holding constant objects are potentially illegal
+  in C++. I have a hard time convincing the compiler the revised
+  "SimpleFixedEffects" can be "emplace_back" to the vector.
+  Hence I drop the constant modifiers.
+
+  modified:   src/FixedEffects.cpp
+  modified:   src/FixedEffects.h
+
+  There is no behavior change so no new test is required.
+
+
 2018-04-15  Minsheng Liu  <lambda@liu.ms>
 
   Refactor "SimpleFixedEffect" to allow generalized fixed effects in the future.
