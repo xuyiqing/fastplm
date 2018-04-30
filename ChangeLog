@@ -1,5 +1,15 @@
 2018-04-30  Minsheng Liu  <lambda@liu.ms>
 
+  Use dependent type to simplify type parameters of "FixedEffect".
+
+  modified:   src/FixedEffect.h
+  modified:   src/FixedEffects.cpp
+
+  There is no behavior change so no new test is required.
+
+
+2018-04-30  Minsheng Liu  <lambda@liu.ms>
+
   Add an "Indicator" class.
 
   The objective is to simplify the code. From a performance perspective,

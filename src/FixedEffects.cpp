@@ -23,7 +23,7 @@ std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& level
 
     effects->simpleEffects = std::vector<SimpleFixedEffect>();
     for (auto i = 0u; i < effects->size; i ++)
-        effects->simpleEffects.emplace_back(effects->indicators[i], std::move(singleton));
+        effects->simpleEffects.emplace_back(effects->indicators[i], SimpleInfluence());
 
     auto indsC = convertNumberingRToC(indsR);
     effects->componentTables = computeComponents(levelCounts, indsC);

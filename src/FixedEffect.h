@@ -4,19 +4,19 @@
 #include "Common.h"
 #include "Indicator.h"
 
-template <typename InfluenceType, typename SumItem, typename SumCollection>
+template <typename Influence>
 struct FixedEffect {
     const Indicator& indicator;
-    InfluenceType influence;
+    Influence influence;
 
-    SumCollection createSum() const;
-    SumItem& get(std::size_t col, SumCollection& sums) const;
-    SumItem embed(std::size_t col, double x) const;
-    void rescale(SumCollection& sums) const;
-    double collapse(std::size_t col, const SumItem& x) const;
+    typename Influence::SumCollection createSum() const;
+    typename Influence::SumItem& get(std::size_t col, typename Influence::SumCollection& sums) const;
+    typename Influence::SumItem embed(std::size_t col, double x) const;
+    void rescale(typename Influence::SumCollection& sums) const;
+    double collapse(std::size_t col, const typename Influence::SumItem& x) const;
 
-    SumCollection demean(arma::subview_col<double> data) const {
-        SumCollection sums(createSum());
+    typename Influence::SumCollection demean(arma::subview_col<double> data) const {
+        typename Influence::SumCollection sums(createSum());
 
         for (auto i = 0u; i < data.n_rows; i ++)
             get(indicator.indicator[i], sums) += embed(i, data[i]);
@@ -29,17 +29,20 @@ struct FixedEffect {
         return sums;
     }
 
-    FixedEffect(const Indicator& indicator, InfluenceType&& influence): indicator(indicator), influence(std::move(influence)) {}
+    FixedEffect(const Indicator& indicator, Influence&& influence): indicator(indicator), influence(std::move(influence)) {}
 };
 
-enum Singleton { singleton };
+struct SimpleInfluence {
+    typedef double SumItem;
+    typedef arma::vec SumCollection;
+};
 
-template<> inline arma::vec FixedEffect<Singleton, double, arma::vec>::createSum() const { return arma::zeros(indicator.levelCount); }
-template<> inline double& FixedEffect<Singleton, double, arma::vec>::get(std::size_t col, arma::vec& sums) const { return sums[col]; }
-template<> inline double FixedEffect<Singleton, double, arma::vec>::embed(std::size_t col, double x) const { return x; }
-template<> inline void FixedEffect<Singleton, double, arma::vec>::rescale(arma::vec& sums) const { sums = sums / indicator.levelSizes; }
-template<> inline double FixedEffect<Singleton, double, arma::vec>::collapse(std::size_t col, const double& x) const { return x; }
+template<> inline arma::vec FixedEffect<SimpleInfluence>::createSum() const { return arma::zeros(indicator.levelCount); }
+template<> inline double& FixedEffect<SimpleInfluence>::get(std::size_t col, arma::vec& sums) const { return sums[col]; }
+template<> inline double FixedEffect<SimpleInfluence>::embed(std::size_t col, double x) const { return x; }
+template<> inline void FixedEffect<SimpleInfluence>::rescale(arma::vec& sums) const { sums = sums / indicator.levelSizes; }
+template<> inline double FixedEffect<SimpleInfluence>::collapse(std::size_t col, const double& x) const { return x; }
 
-typedef FixedEffect<Singleton, double, arma::vec> SimpleFixedEffect;
+typedef FixedEffect<SimpleInfluence> SimpleFixedEffect;
 
 #endif
