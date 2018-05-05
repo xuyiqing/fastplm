@@ -6,15 +6,15 @@
 
 struct FixedEffects {
 public:
-    std::size_t size;
     std::vector<Indicator> indicators;
     std::vector<SimpleFixedEffect> simpleEffects;
+    std::vector<ComplexFixedEffect> complexEffects;
 
     optional<ComponentTables> componentTables;
     std::vector<CrossComponentError> checkComponents(const arma::mat& indicators) const;
 
     std::vector<arma::mat> demean(arma::mat& data) const;
-    static std::unique_ptr<const FixedEffects> create(const arma::uvec& levelCounts, const arma::mat& indsR);
+    static std::unique_ptr<const FixedEffects> create(const arma::uvec& levelCounts, const arma::mat& indsR, const arma::uvec& simpleEffects, const arma::uvec& complexEffects, const arma::uvec& complexInfluences, const std::vector<arma::mat>& weights);
 };
 
 #endif

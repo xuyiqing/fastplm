@@ -28,3 +28,30 @@ warning.cross.component <- function(error, inds, group.levels) {
   sprintf("In [%s], indicator \"%s\" in [%s] and indicator \"%s\" in [%s] are from disconnected components; the predicted value for %s will be NA.",
     row.str, value.x.str, group.x.str, value.y.str, group.y.str, row.str)
 }
+
+error.locate.effect <- function(id) {
+  if (mode(id) == 'numeric')
+    return(sprintf("Specified effect index %s out of bound", paste(id)))
+
+  if (mode(id) == 'character')
+    return(sprintf("Specified effect name %s is not found.", paste(id)))
+
+  sprintf("An effect must be specified by either an integer index or effect name, but %s is given.", paste(mode(id)))
+}
+
+error.create.complex.effect.matrix.required <- function () {
+  sprintf("Weight must be a matrix.")
+}
+
+error.create.complex.effect.matrix.wrong.size <- function(expected, actual) {
+  sprintf("Weight must have as many columns as the size of its corresponding influence. Expected: %d. Actual: %d.",
+      expected, actual)
+}
+
+error.indicators.wrong.type <- function() {
+  sprintf("Argument \"inds\" must be of class \"indicators.\". You can create it via \"create.indicators\".")
+}
+
+error.cfes.wrong.type <- function() {
+  sprintf("Argument \"cfes\" must be of a list of objectes of class \"complex.effect\". You can create the latter via \"create.complex.effect\".")
+}
