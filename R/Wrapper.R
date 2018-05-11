@@ -2,7 +2,7 @@ solveFE <- function(rawData, rawFixedEffects, coreNum = 1, estimateFE = FALSE) {
   solve.fixed.effects(rawData, rawFixedEffects, coreNum)
 }
 
-name.fxied.effects <- function(model, inds) {
+name.fixed.effects <- function(model, inds) {
   names(model$FEcoefs) <-
     if (is.null(colnames(inds)))
       sapply(1 : ncol(inds), function(col) paste("effect", col, sep = "."))
@@ -19,13 +19,12 @@ create.indicators <- function (inds) {
   factors      <- lapply(1 : ncol(inds), function(col) factor(inds[, col]))
   levels       <- lapply(factors, levels)
   level.sizes  <- sapply(levels, length)
+  inds         <- sapply(factors, as.numeric)
   effect.names <-
     if (is.null(colnames(inds)))
       sapply(1 : ncol(inds), function(col) paste("effect", col, sep = "."))
     else
       colnames(inds)
-
-  inds         <- sapply(factors, as.numeric)
 
   r <- mget(c("levels", "level.sizes", "effect.names", "inds"),
     environment())
@@ -107,7 +106,7 @@ solve.fixed.effects <- function(data, inds, core.num = 1) {
   model$cpp.fixed.effects <- cpp.fixed.effects
 
   model$group.levels <- indicators$levels
-  model <- name.fxied.effects(model, inds)
+  model <- name.fixed.effects(model, inds)
   model
 }
 

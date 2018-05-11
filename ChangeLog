@@ -1,3 +1,36 @@
+2018-05-10  Minsheng Liu  <lambda@liu.ms>
+
+  [GARDEN] Prune the package.
+
+  Fix a typo and a style issue.
+
+  modified:   R/Wrapper.R
+
+  Remove old unnecessary files for testing C++ code directly.
+
+  modified:   CMakeLists.txt
+  deleted:    src/MatrixReader.cpp
+  deleted:    src/MatrixReader.h
+  deleted:    tests/FEDataGenerator.r
+  deleted:    tests/GPDataGenerator.r
+
+  "MatrixReader" will be replaced by Armadillo’s "load" function.
+  As for future C++ level tests,
+
+  * small data sets will be saved in the repository directly;
+  * big data sets will be generated on demeand, with generation scripts
+    saved in the repository.
+
+  Document some new functions in "README.md":
+
+  * "create.indicators"
+  * "create.complex.effect"
+  * "create.fixed.effects"
+  * "solve.fixed.effects"
+
+  Note that "solve.fixed.effects" as documented has not yet been implemented.
+
+
 2018-05-04  Minsheng Liu  <lambda@liu.ms>
 
   Finish the implementation of demean for complex fixed effects.

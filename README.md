@@ -6,66 +6,141 @@ A package for fast fixed-effects algorithms.
 
 The package is structurally similar to most packages using Rcpp, with `src` directories containing all C/C++ codes. However, we also provide `cmake` support, with which we can build and debug a pure C++ package using whatever tool chains convenient.
 
-## Usage
+## Primitives
 
-There are currently two functions exposed directly using Rcpp:
+The library provides a list of primitives to solve fixed effects problems:
 
-* `solveFE`
-* `solveGP`
+* `create.indicators`
+* `create.complex.effect`
+* `create.fixed.effects`
+* `solve.fixed.effects`
 
+We will also expose some higher level functions simplifying some everyday usage.
+Those functions will be merely a thin wrapper of those primitives,
+and can be implemented in pure R without performance hits.
 
+The following section documents those primitives. Undocumented features,
+including but not limited optional parameters and properties of returned objects
+should not be tampered with and are subject to change at any time.
+Use them at your own risks.
 
-### SolveFE
+- `create.indicators`:
 
-This function solves an ordianary linear system with multi-way fixed effects. It currently takes two inputs:
+  Creates an object describing the groups each observation belongs to.
+  The result is required in other primitives.
 
-* a normal data matrix with its first column being Y and the rest being X;
-* a matrix specifying fixed effects; each column represents a category, and within each column it specifies which group of that category the row belongs to.
+  - parameters:
 
-Concretely, suppose we have three individuals A, B, C and two firms X, Y. We make six observations sorted as (A, X), (B, X), (C, X), (A, Y), (B, Y), (C, Y). The fixed effect matrix would look like
+    - `inds`: A matrix where each row corresponds to the row (observation)
+    in the X-Y dataset and each column represents an effect.
+    The entry of row X of effect Y represents the group in Y that X belongs to.
+    Groups can be specified by numbers or strings.
 
-| Individual | Firm |
-| ---------- | ---- |
-| 1          | 1    |
-| 2          | 1    |
-| 3          | 1    |
-| 1          | 2    |
-| 2          | 2    |
-| 3          | 2    |
+  - returns: An object of class `indicators` with the following properties:
 
-The number for group does not need to start from 1. The programs internally handle all complexities to identify different groups.
+    - `levels`: Distinct groups in each effect.
+    It is structured as a list of the same length as the number of effects.
+    Each list item is a vector of levels (distinct groups) of the corresponding
+    effect. The order of levels in each list item is not guaranteed.
 
-The output would including:
+    - `level.sizes`: The number of occurrences of each level in the input.
+    The structure and order of `level.sizes` is the same as `levels`.
 
-* coefficients or parameters or β or whatever you prefer to call it;
-* intercept;
-* fixed effects for each category.
+    * `effect.names`: A vector of names of each effect.
+    If `colnames` of the input is set, that will be used.
+    Otherwise, effects will be named as `effect.1`, `effect.2`, and so on,
+    in the same order as they are listed as the columns of the input.
 
-Coefficients are estimated via MAP, whereas fixed effects are estimated using gradient descent.
+- `create.complex.effect`
 
-Note that fixed effects for each category is a vector. It is identified with the given group values in an increasing order. So let us say we have three individuals labeld as A = 7, B = 2, C = 9, then the output fixed effect for the individual category would be in the order of B, A, C.
+  Creates a *complex fixed effect*.
+  The result is used to construct the system of fixed effects.
 
-### SolveGP
+  A *complex fixed effect* is a generalized version of fixed effect.
+  It consists a pair of two effects (I, E) interacting with each other.
+  I stands for *influence*. Each level of I has an *observed* vector `weight`.
+  E stands for *effect*. Each level of Ehas an *unobserved* vector `coefficient`
+  to estimate.
+  For each observation, the effect of some complex fixed effect (I, E)
+  is the dot product of the weight of the row’s group for I
+  and the coefficient of the row’s level for E.
 
-This function handles the model as specified in `math/GPanel.pdf`. It only supports two way effects. For simplicity, let’s assume the two categories are time and individuals. 
+  - parameters:
 
-The function takes five arguments:
+    - `inds`: The `indicators` object the complex fixed effect is about.
 
-* Y,
-* X,
-* time-observable individual-specific (TOIS) effects,
-* individual-observable time-specific (IOTS) effects,
-* a boolean value specifying whether the data is balanced (`TRUE`) or not.
+    - `eff`: The effect of the complex fixed effect.
+    It can be specified either by effect name as in `inds$effect.names`,
+    or by the index of the effect in `inds`.
 
-A few notes on data structure:
+    - `inf`: The influence of the complex fixed effect.
+    It can be specified either by effect name as in `inds$effect.names`,
+    or by the index of the effect in `inds`.
 
-* Logically, we assume Y to be a matrix with rows specifying time and columns specifying individuals;
-* X is treated as a cube, with the third dimension meaning different variables;
-* Concretely, we treat Y as a vector and X a matrix. The data is sorted in a column major. In other words, the vector would be the same as we go through the first column of Y, then the second, then the third, and so on.
-* TOIS and IOTS are organized the same as specified in  `math/GPanel.pdf`.
-* For unbalanced situations, knocking out missing cells in Y by marking it as `NaN` ((not a number)[https://en.wikipedia.org/wiki/NaN]).
+    - `weight`: A matrix of weights associated with the influence.
+    Each column represents the weight of the corresponding level.
+    Weight should be given in the same order as the order of levels
+    for influence in `inds$levels`.
 
-The output is the estimated coefficients.
+      Only matrix is accepted, even if the weight associated with each
+      level is one-dimensional (i.e. a scalar). Use `as.matrix` when necessary.
 
-This function is just finished. We will polish it to add more options and outputs.
+  - returns: An object of class `complex.effect`.
 
+- `create.fixed.effects`
+
+  Creates a system of fixed effects for some model.
+  The result is used to solve that model.
+
+  - parameters:
+
+    - `inds`: The `indicators` object the system of fixed effects is about.
+
+    - `sfes`: A collection of simple (i.e. non-complex) fixed effects.
+    Each can be specified either by effect name as in `inds$effect.names`,
+    or by the index of the effect in `inds`.
+
+      `sfes` is optional. If not specified, it will be taken to be the
+      collection of all effects in `inds`.
+
+    - `cfes`: A collection of complex fixed effects. Each should be an object
+    of class `complex.effect` created by `create.complex.effect`.
+
+      `cfes` is optional. If not specified, it will be taken as an empty list.
+
+  - returns: An opaque object representing the system of fixed effects.
+
+- `solve.fixed.effects`
+
+  Solves the fixed effects model.
+
+  - warning: The function has not been implemented.
+
+  - parameters:
+
+    - `data`: The X-Y dataset. The first column is the Y vector.
+    The rest is the X matrix.
+
+      `data` is optional. If not specified, then `data` will be built from
+      `x` and `y` (i.e. `data <- cbind(y, x)`).
+      If both `data` and `x`, `y` are present, `data` will be used used.
+
+    - `y`: The Y vector. Optional if `data` is provided.
+
+    - `x`: The X matrix. Optional if `data` is provided.
+
+      X can have zero column; in such case, the function merely estimates
+      these fixed effects.
+
+    - `inds`: The `indicators` object the model is about.
+
+    - `fe`: The system of fixed effects characterizing the model
+    created by `create.fixed.effect`.
+
+    - `core.num`: The number of cores used in demean.
+
+      `core.num` is optional. Default is `1`.
+
+  - returns: The object of class `fe.model` recording the solution.
+
+    TODO: finish the specification for `fe.model`.
