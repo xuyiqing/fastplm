@@ -1,3 +1,39 @@
+2018-05-04  Minsheng Liu  <lambda@liu.ms>
+
+  Finish the implementation of demean for complex fixed effects.
+
+  modified:   src/FixedEffect.h
+  modified:   src/FixedEffects.cpp
+  modified:   src/FixedEffects.h
+
+  So far, only demean is supported, though estimation should be relatively
+  easy to add.
+
+  We have change the C++ interface. "CreateFixedEffects" now
+  requires specification for both simple fixed effects and
+  complex fixed effects. Bridging for old code is done in R.
+
+  modified:   src/Wrapper.cpp
+
+  We plan to break the existing interface. Users will need to
+  manually create an object of class "indicators" via "create.indicators",
+  then specify fixed effects via "create.fixed.effects",
+  and lastly call "solve.fixed.effects" to get the result.
+
+  Right now, only the first two functions mentioned above are implemented.
+  "create.fixed.effects" is kept as it is. Moreover, none of them is exposed,
+  which will be delayed to the next few commits.
+
+  modified:   R/Wrapper.R
+  modified:   R/messages.R
+
+  A test is added to ensure demean is corrected. The test makes a direct
+  call to "SolveFixedEffects". It will be refined once final decisions on
+  the R interface are made.
+
+  new file:   tests/testthat/test-demean-complex-fixed-effects.R
+
+
 2018-04-30  Minsheng Liu  <lambda@liu.ms>
 
   Use dependent type to simplify type parameters of "FixedEffect".
