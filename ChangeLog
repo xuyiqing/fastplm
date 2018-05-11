@@ -1,3 +1,15 @@
+2018-05-11  Minsheng Liu  <lambda@liu.ms>
+
+  [GARDEN] Remove literatures.
+
+  deleted:    literatures/Correia.pdf
+  deleted:    literatures/Gaure 2013.pdf
+  deleted:    literatures/reghdfe-slides.pdf
+
+  There are some copyright concerns. Moreover, they are not useful.
+  If we will write a report, it suffices to put references there.
+
+
 2018-05-10  Minsheng Liu  <lambda@liu.ms>
 
   [GARDEN] Prune the package.
