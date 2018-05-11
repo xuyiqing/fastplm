@@ -28,7 +28,7 @@ void unionByRank(std::vector<Component>& components, ID x, ID y) {
 }
 // Above is an implementation of the union-find algorithm with path compression and union by rank.
 
-optional<ComponentTables> computeComponents(const arma::uvec& groupSizes, const arma::umat& indicators) {
+optional<ComponentTables> computeComponents(const arma::uvec& groupSizes, const std::vector<Indicator>& indicators) {
     auto totalNodes = arma::sum(groupSizes);
     std::vector<Component> components(totalNodes);
     for (auto i = 0u; i < totalNodes; i ++) {
@@ -36,15 +36,17 @@ optional<ComponentTables> computeComponents(const arma::uvec& groupSizes, const 
         components[i].rank = 0;
     }
 
-    indicators.each_row([&](const auto& row) {
+    std::size_t effectCount = groupSizes.n_elem;
+    std::size_t totalRows = indicators[0].indicator.n_rows;
+    for (auto row = 0u; row < totalRows; row ++) {
         ID offset = 0;
-        for (auto i = 0; i < groupSizes.n_elem - 1; i ++) {
-            ID x = offset + row[i];
+        for (auto i = 0u; i < effectCount - 1; i ++) {
+            ID x = offset + indicators[i].indicator[row];
             offset += groupSizes[i];
-            ID y = offset + row[i + 1];
+            ID y = offset + indicators[i + 1].indicator[row];
             unionByRank(components, x, y);
         }
-    });
+    }
 
     std::unordered_set<ID> distinctGroups;
     ComponentTables tables;

@@ -3,12 +3,6 @@
 #include "CrushQueue.h"
 #include "FixedEffects.h"
 
-arma::umat convertNumberingRToC(const arma::mat& indsR) {
-    arma::umat indsC(indsR.n_rows, indsR.n_cols);
-    std::transform(indsR.begin(), indsR.end(), indsC.begin(), [](double x) { return static_cast<std::size_t>(x) - 1; });
-    return indsC;
-}
-
 std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& levelCounts, const arma::mat& indsR, const arma::uvec& simpleEffects, const arma::uvec& complexEffects, const arma::uvec& complexInfluences, const std::vector<arma::mat>& weights) {
     auto effects = std::make_unique<FixedEffects>();
 
@@ -49,15 +43,15 @@ std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& level
         effects->complexEffects.emplace_back(eff, std::move(CI));
     }
 
-    // TODO: rewrite componenet analysis to use effects->indicators directly.
-    auto indsC = convertNumberingRToC(indsR);
-    effects->componentTables = computeComponents(levelCounts, indsC);
+    effects->componentTables = computeComponents(levelCounts, effects->indicators);
 
     return effects;
 }
 
 std::vector<CrossComponentError> FixedEffects::checkComponents(const arma::mat& indsR) const {
-    auto indsC = convertNumberingRToC(indsR);
+    arma::umat indsC(indsR.n_rows, indsR.n_cols);
+    std::transform(indsR.begin(), indsR.end(), indsC.begin(), [](double x) { return static_cast<std::size_t>(x) - 1; });
+
     if (!componentTables)
         return {};
 

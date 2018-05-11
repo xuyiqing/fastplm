@@ -1,5 +1,16 @@
 2018-05-11  Minsheng Liu  <lambda@liu.ms>
 
+  Make componenet analysis use "std::vector<Indicator>" directly.
+
+  modified:   src/ComponentAnalysis.cpp
+  modified:   src/ComponentAnalysis.h
+  modified:   src/FixedEffects.cpp
+
+  There is no behavior change so no new test is required.
+
+
+2018-05-11  Minsheng Liu  <lambda@liu.ms>
+
   [GARDEN] Remove literatures.
 
   deleted:    literatures/Correia.pdf

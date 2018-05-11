@@ -4,10 +4,11 @@
 #include <unordered_set>
 
 #include "Common.h"
+#include "Indicator.h"
 
 typedef std::vector<arma::uvec> ComponentTables;
 
-optional<ComponentTables> computeComponents(const arma::uvec& groupSizes, const arma::umat& indicators);
+optional<ComponentTables> computeComponents(const arma::uvec& groupSizes, const std::vector<Indicator>& indicators);
 
 struct CrossComponentError {
     std::size_t groupX, groupY;
