@@ -24,13 +24,15 @@ auto checkLinearDependency(const arma::mat& mat) {
         else
             independents[i] = 1;
 
-    return std::make_pair(arma::find(dependents), arma::find(independents));
+    arma::uvec udeps = arma::find(dependents);
+    arma::uvec uinds = arma::find(independents);
+    return std::make_pair(udeps, uinds);
 }
 
 const LinearModel LinearModel::solve(const arma::mat& X, const arma::vec& Y) {
     auto _1 = checkLinearDependency(X);
-    arma::uvec dependents = _1.first;
-    arma::uvec independents = _1.second;
+    arma::uvec& dependents = _1.first;
+    arma::uvec& independents = _1.second;
     bool isLinearDependent = dependents.n_rows > 0;
 
     arma::vec leanBeta = arma::solve(X.cols(independents), Y);

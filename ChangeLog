@@ -1,3 +1,30 @@
+2018-05-12  Minsheng Liu  <lambda@liu.ms>
+
+  Add an example of manual test for pure C++.
+
+  modified:   CMakeLists.txt
+  new file:   tests/CMakeLists.txt
+  new file:   tests/manual/CMakeLists.txt
+  new file:   tests/manual/basic-cpp/.gitignore
+  new file:   tests/manual/basic-cpp/CMakeLists.txt
+  new file:   tests/manual/basic-cpp/README.md
+  new file:   tests/manual/basic-cpp/main.cpp
+  new file:   tests/manual/basic-cpp/make-data.R
+
+  Delete an unused variable in FixedEffectModel.
+
+  modified:   src/FixedEffectModel.h
+
+  Specify the return type of "checkLinearDependency".
+
+  modified:   src/LinearModel.cpp
+
+  Previously, return type is auto deduced based on two calls to "arma::find".
+  The type deduced is some generic Armadillo class that, when copied,
+  will cause some problem in debug mode. The new code both forces
+  the return type to be a pair of "arma::uvec" and eliminates the copy.
+
+
 2018-05-11  Minsheng Liu  <lambda@liu.ms>
 
   Make componenet analysis use "std::vector<Indicator>" directly.

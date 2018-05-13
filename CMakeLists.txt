@@ -28,6 +28,4 @@ add_library(FastPLM
 
 target_compile_definitions(FastPLM PUBLIC BUILD_WITHOUT_R)
 
-add_executable(Debug debug/Debug.cpp)
-
-target_link_libraries(Debug FastPLM /usr/local/lib/libarmadillo.dylib)
+add_subdirectory(tests)

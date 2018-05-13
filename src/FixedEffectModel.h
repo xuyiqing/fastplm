@@ -9,7 +9,6 @@ struct FixedEffectModel {
 public:
     LinearModel demeaned;
 
-    arma::vec coefficients;
     std::vector<arma::vec> feCoefs;
 
     arma::vec fittedValues, residuals;
