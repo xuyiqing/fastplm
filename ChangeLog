@@ -1,5 +1,10 @@
 2018-05-12  Minsheng Liu  <lambda@liu.ms>
 
+  Adopt MIT license.
+
+
+2018-05-12  Minsheng Liu  <lambda@liu.ms>
+
   Add an example of manual test for pure C++.
 
   modified:   CMakeLists.txt
