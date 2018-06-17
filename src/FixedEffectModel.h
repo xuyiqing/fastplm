@@ -28,7 +28,8 @@ public:
         Rcpp::List feCoefs_;
         for (const auto& coefs : feCoefs)
             feCoefs_.push_back(coefs);
-        _["FEcoefs"] = feCoefs_;
+        _["sfe.coefs"] = feCoefs_;
+        _["cfe.coefs"] = Rcpp::List();
 
         _["fitted.values"] = fittedValues;
         _["residuals"] = residuals;

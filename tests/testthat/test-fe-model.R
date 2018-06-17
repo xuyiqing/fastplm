@@ -1,0 +1,91 @@
+context("FE Model Related Functionality")
+
+source("plain-data.R")
+
+test_that("Demean should be correct w.r.t. felm.", {
+  library(lfe)
+
+  inds     <- create.indicators(raw.inds)
+  actual   <- unname(solve.fe.model(inds, y = y, x = x)$coefficients)
+  expected <- unname(felm(y ~ x | raw.inds[,1] + raw.inds[,2] + raw.inds[,3])$coefficients)
+
+  expect_equal(actual, expected)
+})
+
+test_that("Demean should be independent of concrete values of indicators.", {
+  inds1 <- create.indicators(raw.inds)
+  inds2 <- create.indicators(new.inds)
+
+  expected <- unname(solve.fe.model(inds1, y = y, x = x)$coefficients)
+  actual   <- unname(solve.fe.model(inds2, y = y, x = x)$coefficients)
+
+  expect_equal(actual, expected)
+})
+
+test_that("Estimated fixed effects should have correct row names.", {
+  inds  <- create.indicators(new.inds)
+  model <- solve.fe.model(inds, y = y, x = x)
+
+  sfe.coefs <- lapply(model$sfe.coefs, function(coefs) as.list(coefs[, 1]))
+  effs      <- Reduce("+", lapply(1 : length(sfe.coefs), function(col) {
+    sapply(1 : nrow(y), function(row) {
+      (sfe.coefs[[col]])[[inds$inds[row, col]]]
+    })
+  }))
+
+  fitted.values <- x %*% model$coefficients + model$intercept + effs
+
+  expect_equal(fitted.values, model$fitted.values)
+})
+
+test_that("Demean without X should yield fixed effects.", {
+  inds  <- create.indicators(new.inds)
+  model <- solve.fe.model(y = effs, inds)
+
+  for (i in 1 : 3)
+    expect_equal(unname(model$sfe.coefs[[i]]),
+                 unname(as.matrix(sfe.coefs[,i] - mean(sfe.coefs[,i]))))
+
+  expect_equal(model$intercept, sum(sapply(1 : 3, function(i) mean(sfe.coefs[,i]))))
+})
+
+test_that("Parallel demean should give identical results.", {
+  inds   <- create.indicators(new.inds)
+  models <- lapply(1 : 8, function(core.num) {
+    model <- solve.fe.model(inds, y = y, x = x, core.num = core.num)
+    # "fe" contains a pointer.
+    model$fe <- NULL
+    model
+  })
+
+  baseline <- models[[1]]
+  lapply(2 : 8, function(i) expect_identical(models[[i]], baseline))
+})
+
+test_that("Prediction with original input should yield fitted values.", {
+  inds     <- create.indicators(new.inds)
+  model    <- solve.fe.model(inds, y = y, x = x)
+  sub.inds <- create.subindicators(new.inds, model)
+  actual   <- predict.fe.model(model, x, sub.inds)
+
+  expect_equal(actual, model$fitted.values)
+})
+
+test_that("Prediction should ignore NA row(s).", {
+  rows     <- sample(N, 5)
+
+  inds     <- create.indicators(new.inds)
+  model    <- solve.fe.model(inds, y = y, x = x)
+  sub.inds <- create.subindicators(new.inds, model)
+  expected <- predict.fe.model(model, x, sub.inds)
+
+  expected[rows, ] <- NA
+
+  act.inds <- new.inds
+  act.inds[rows, ] <- NA
+
+  sub.inds <- suppressWarnings(create.subindicators(act.inds, model))
+  actual   <- predict.fe.model(model, x, sub.inds)
+
+  expect_identical(actual, expected)
+})

@@ -46,7 +46,7 @@ Use them at your own risks.
     - `level.sizes`: The number of occurrences of each level in the input.
     The structure and order of `level.sizes` is the same as `levels`.
 
-    * `effect.names`: A vector of names of each effect.
+    - `effect.names`: A vector of names of each effect.
     If `colnames` of the input is set, that will be used.
     Otherwise, effects will be named as `effect.1`, `effect.2`, and so on,
     in the same order as they are listed as the columns of the input.

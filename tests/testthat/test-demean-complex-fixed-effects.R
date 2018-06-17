@@ -51,7 +51,7 @@ cpp  <- create.fixed.effects(indicators, cfes = list(cfe1, cfe2))
 
 result.lm      <- lm(y ~ x + factor(inds[, 1]) * mapped.inf(2)
                            + factor(inds[, 2]) * mapped.inf(1))
-result.fastplm <- SolveFixedEffects(data, cpp, 1)
+result.fastplm <- SolveFixedEffects(data, cpp$ptr, 1)
 
 test_that("Demean complex fixed effects.", {
   expect_equal(as.matrix(unname(result.lm$coefficients[2 : 6])),

@@ -1,3 +1,59 @@
+2018-06-17  Minsheng Liu  <lambda@liu.ms>
+
+  Revamp R side code.
+
+  Several primitives are introduced to replace "solveFE" and "predictFE":
+
+  modified:   NAMESPACE
+  deleted:    R/Wrapper.R
+  new file:   R/fe.model.R
+  new file:   R/fixed.effects.R
+  new file:   R/indicators.R
+
+  A few assertion helpers are introduced.
+  To make the code easier to read, error/warning messages are moved
+  to be after where they are used:
+
+  new file:   R/base.R
+  deleted:    R/messages.R
+
+  Rename "FEcoefs" to "sfe.coefs" and introduce an empty "cfe.coefs"
+  that will be implemented soon.
+
+  modified:   src/FixedEffectModel.h
+
+  Revamp test code:
+  * Test files are now class-based rather than case-based.
+    Cases are treated by "test_that" clauses now.
+  * Adopt new primitives.
+  * In the new testing style, no testing clause mutates shared data directly.
+    This way, data generation can be done directly in "plain-data.R"
+    rather than wrapped in the function "make.small.data".
+    We achieve better testing performance and simpler code.
+  * Note that "make-small-data.R" is kept for code inside manual tests.
+    It will be removed once we are certain no manual test will be broken.
+
+  new file:   tests/testthat/plain-data.R
+  deleted:    tests/testthat/test-component-analysis.R
+  deleted:    tests/testthat/test-demean-fixed-effects.R
+  deleted:    tests/testthat/test-demean-without-x.R
+  new file:   tests/testthat/test-fe-model.R
+  deleted:    tests/testthat/test-fixed-effects-rownames.R
+  new file:   tests/testthat/test-fixed-effects.R
+  new file:   tests/testthat/test-indicators.R
+  deleted:    tests/testthat/test-parallel-demean-correct.R
+  deleted:    tests/testthat/test-predict-fixed-effects-with-unknown-indicators.R
+  deleted:    tests/testthat/test-predict-fixed-effects.R
+
+  Fix a typo of unordered list:
+
+  modified:   README.md
+
+  Adopt changes to "create.fixed.effects":
+
+  modified:   tests/testthat/test-demean-complex-fixed-effects.R
+
+
 2018-05-12  Minsheng Liu  <lambda@liu.ms>
 
   Adopt MIT license.
