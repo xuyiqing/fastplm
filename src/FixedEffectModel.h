@@ -9,7 +9,8 @@ struct FixedEffectModel {
 public:
     LinearModel demeaned;
 
-    std::vector<arma::vec> feCoefs;
+    std::vector<arma::vec> sfeCoefs;
+    std::vector<arma::mat> cfeCoefs;
 
     arma::vec fittedValues, residuals;
     double intercept;
@@ -25,11 +26,14 @@ public:
         _["demeaned"] = static_cast<Rcpp::List>(demeaned);
         _["coefficients"] = demeaned.beta;
 
-        Rcpp::List feCoefs_;
-        for (const auto& coefs : feCoefs)
-            feCoefs_.push_back(coefs);
-        _["sfe.coefs"] = feCoefs_;
-        _["cfe.coefs"] = Rcpp::List();
+        Rcpp::List sfeCoefs_;
+        for (const auto& coefs : sfeCoefs)
+            sfeCoefs_.push_back(coefs);
+        _["sfe.coefs"] = sfeCoefs_;
+        Rcpp::List cfeCoefs_;
+        for (const auto& coefs : cfeCoefs)
+            cfeCoefs_.push_back(coefs);
+        _["cfe.coefs"] = cfeCoefs_;
 
         _["fitted.values"] = fittedValues;
         _["residuals"] = residuals;

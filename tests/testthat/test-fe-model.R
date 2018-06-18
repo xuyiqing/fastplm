@@ -1,4 +1,4 @@
-context("FE Model Related Functionality")
+context("FE Model: Simple Fixed Effects")
 
 source("plain-data.R")
 
@@ -88,4 +88,34 @@ test_that("Prediction should ignore NA row(s).", {
   actual   <- predict.fe.model(model, x, sub.inds)
 
   expect_identical(actual, expected)
+})
+
+context("FE Model: Complex Fixed Effects")
+
+source("complex-effects.R")
+
+inds <- create.indicators(raw.inds)
+
+cfe1 <- create.complex.effect(inds, 1, 2, t(as.matrix(inf2)))
+cfe2 <- create.complex.effect(inds, 2, 1, t(as.matrix(inf1)))
+
+fe   <- create.fixed.effects(inds, cfes = list(cfe1, cfe2))
+
+test_that("Demean should be correct w.r.t. lm.", {
+  model.us <- solve.fe.model(inds, y = y, x = x, fe = fe)
+  model.lm <- lm(y ~ x + factor(raw.inds[, 1]) * mapped.inf(2)
+                       + factor(raw.inds[, 2]) * mapped.inf(1))
+
+  actual   <- unname(model.us$coefficients)
+  expected <- as.matrix(unname(model.lm$coefficients[2 : 6]))
+
+  expect_equal(actual, expected)
+})
+
+test_that("Prediction with original input should yield fitted values.", {
+  model    <- solve.fe.model(inds, y = y, x = x, fe = fe)
+  sub.inds <- create.subindicators(raw.inds, model)
+  actual   <- predict.fe.model(model, x, sub.inds)
+
+  expect_equal(actual, model$fitted.values)
 })

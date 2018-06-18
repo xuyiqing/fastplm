@@ -1,5 +1,26 @@
 2018-06-18  Minsheng Liu  <lambda@liu.ms>
 
+  Add support to predict models with complex fixed effects.
+
+  modified:   src/FixedEffectModel.cpp
+  modified:   src/FixedEffectModel.h
+  modified:   src/FixedEffects.cpp
+  modified:   src/FixedEffects.h
+
+  New test:
+
+  new file:   tests/testthat/complex-effects.R
+  deleted:    tests/testthat/test-demean-complex-fixed-effects.R
+  modified:   tests/testthat/test-fe-model.R
+
+  The deleted file uses the old file-as-scenario scheme.
+  Its data generation part is put into "complex-effects.R",
+  whereas the rest and the new test for prediction are
+  added to "test-fe-model.R".
+
+
+2018-06-18  Minsheng Liu  <lambda@liu.ms>
+
   Remove "make-small-data.R".
 
   modified:   tests/manual/basic-cpp/make-data.R

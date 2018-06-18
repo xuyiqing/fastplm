@@ -62,15 +62,21 @@ struct Payload {
     const FixedEffects& fixedEffects;
     arma::subview_col<double> data;
     arma::vec backup;
-    std::vector<arma::vec> deltas;
+    std::vector<arma::vec> simpleDeltas;
+    std::vector<arma::mat> complexDeltas;
     const double epsilon;
     const std::size_t maxIterations;
 
-    Payload(const FixedEffects& fixedEffects, arma::subview_col<double> data, const double epsilon, const std::size_t maxIterations): fixedEffects(fixedEffects), data(data), backup(data.n_cols), deltas(), epsilon(epsilon), maxIterations(maxIterations) {
+    Payload(const FixedEffects& fixedEffects, arma::subview_col<double> data, const double epsilon, const std::size_t maxIterations): fixedEffects(fixedEffects), data(data), backup(data.n_cols), simpleDeltas(), epsilon(epsilon), maxIterations(maxIterations) {
         std::transform(fixedEffects.simpleEffects.begin(),
                        fixedEffects.simpleEffects.end(),
-                       std::back_inserter(deltas),
+                       std::back_inserter(simpleDeltas),
                        [](auto& x) { return arma::zeros(x.indicator.levelCount); });
+
+        std::transform(fixedEffects.complexEffects.begin(),
+                       fixedEffects.complexEffects.end(),
+                       std::back_inserter(complexDeltas),
+                       [](auto& x) { return arma::zeros(x.influence.dimension, x.indicator.levelCount); });
     }
 };
 
@@ -83,10 +89,9 @@ void demean(void* ptr) {
         casted.backup = casted.data;
 
         for (auto i = 0u; i < effects.simpleEffects.size(); i ++)
-            casted.deltas[i] += effects.simpleEffects[i].demean(casted.data);
-        // TODO: add deltas computation for complex effects
+            casted.simpleDeltas[i] += effects.simpleEffects[i].demean(casted.data);
         for (auto i = 0u; i < effects.complexEffects.size(); i ++)
-            effects.complexEffects[i].demean(casted.data);
+            casted.complexDeltas[i] += effects.complexEffects[i].demean(casted.data);
 
         double epsilon = arma::accu(arma::abs(casted.data - casted.backup));
         if (isnan(epsilon))
@@ -99,7 +104,7 @@ void demean(void* ptr) {
     mainQueue->commit(ptr);
 }
 
-std::vector<arma::mat> FixedEffects::demean(arma::mat& data) const {
+std::vector<FixedEffects::Deltas> FixedEffects::demean(arma::mat& data) const {
     std::vector<std::unique_ptr<Payload>> payloads;
     for (auto i = 0u; i < data.n_cols; i ++) {
         auto payload = std::make_unique<Payload>(*this, data.col(i), 1e-6, 5);
@@ -112,13 +117,10 @@ std::vector<arma::mat> FixedEffects::demean(arma::mat& data) const {
     mainQueue->commit(::demean, std::move(queue));
     mainQueue->crush();
 
-    std::vector<arma::mat> deltas;
-    for (auto i = 0u; i < simpleEffects.size(); i ++) {
-        const auto& effect = simpleEffects[i];
-        arma::mat delta(effect.indicator.levelCount, data.n_cols);
-        for (auto j = 0u; j < data.n_cols; j ++)
-            delta.col(j) = payloads[j]->deltas[i];
-        deltas.emplace_back(std::move(delta));
-    }
+    std::vector<Deltas> deltas;
+    for (auto i = 0u; i < data.n_cols; i ++)
+        deltas.emplace_back(std::make_pair(std::move(payloads[i]->simpleDeltas),
+                                           std::move(payloads[i]->complexDeltas)));
+
     return deltas;
 }
