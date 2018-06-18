@@ -1,3 +1,11 @@
+2018-06-18  Minsheng Liu  <lambda@liu.ms>
+
+  Remove "make-small-data.R".
+
+  modified:   tests/manual/basic-cpp/make-data.R
+  deleted:    tests/testthat/make-small-data.R
+
+
 2018-06-17  Minsheng Liu  <lambda@liu.ms>
 
   Revamp R side code.
