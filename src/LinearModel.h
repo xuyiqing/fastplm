@@ -18,8 +18,8 @@ public:
 #ifndef BUILD_WITHOUT_R
     operator Rcpp::List() const {
         Rcpp::List _;
-        _["X"] = X;
-        _["Y"] = Y;
+        _["x"] = X;
+        _["y"] = Y;
         _["is.linear.dependent"] = isLinearDependent;
         _["dependents"] = dependents;
         _["independents"] = independents;

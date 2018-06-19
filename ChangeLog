@@ -1,3 +1,29 @@
+2018-06-19  Minsheng Liu  <lambda@liu.ms>
+
+  Complete documentation.
+
+  new file:   man/create.complex.effect.rd
+  new file:   man/create.fixed.effects.rd
+  new file:   man/create.indicators.rd
+  new file:   man/create.subindicators.rd
+  new file:   man/predict.fe.model.rd
+  new file:   man/solve.fe.model.rd
+
+  Remove prelim documentation from "README.md":
+
+  modified:   README.md
+
+  Remove ghost files:
+
+  deleted:    man/solveFE.rd
+  deleted:    man/predictFE.rd
+
+  Rename properties "X" and "Y" to "x" and "y" for demeaned linear model
+  on the R side:
+
+  modified:   src/LinearModel.h
+
+
 2018-06-18  Minsheng Liu  <lambda@liu.ms>
 
   Add support to predict models with complex fixed effects.
