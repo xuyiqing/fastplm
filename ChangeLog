@@ -1,5 +1,12 @@
 2018-06-19  Minsheng Liu  <lambda@liu.ms>
 
+  Bump the version to 0.2.0.0.
+
+  modified:   DESCRIPTION
+
+
+2018-06-19  Minsheng Liu  <lambda@liu.ms>
+
   Use 100 rather than 10 replications in speed test.
 
   modified:   tests/manual/speed-test/speed-test.R
