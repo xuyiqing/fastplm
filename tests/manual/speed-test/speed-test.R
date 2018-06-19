@@ -32,6 +32,6 @@ run <- function(N) {
     R1 <- felm(y ~ x | inds[, 1] + inds[, 2] + inds[, 3]),
     R2 <- solve.fe.model(create.indicators(inds), x = x, y = y),
     order = NULL,
-    replications = 10
+    replications = 100
   )
 }
