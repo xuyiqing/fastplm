@@ -1,5 +1,19 @@
 2018-06-19  Minsheng Liu  <lambda@liu.ms>
 
+  Update speed test to reflect recent changes.
+
+  deleted:    tests/SpeedResult.pdf
+  deleted:    tests/SpeedResult.txt
+  deleted:    tests/SpeedTest.r
+  new file:   tests/manual/speed-test/speed-test.R
+
+  Typo in setting "LEVEL":
+  
+  modified:   tests/manual/basic-cpp/make-data.R
+
+
+2018-06-19  Minsheng Liu  <lambda@liu.ms>
+
   Complete documentation.
 
   new file:   man/create.complex.effect.rd

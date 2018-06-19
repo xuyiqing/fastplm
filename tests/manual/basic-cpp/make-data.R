@@ -1,6 +1,6 @@
 SEED  <- 19260817
 N     <- 64000
-LEVEL <- 64000
+LEVEL <- 100
 
 set.seed(SEED)
 
