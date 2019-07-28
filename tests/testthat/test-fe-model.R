@@ -5,26 +5,27 @@ source("plain-data.R")
 test_that("Demean should be correct w.r.t. felm.", {
   library(lfe)
 
-  inds     <- create.indicators(raw.inds)
-  actual   <- unname(solve.fe.model(inds, y = y, x = x)$coefficients)
+  ## inds     <- create.indicators(raw.inds)
+  actual   <- unname(fastplm(ind = raw.inds, y = y, x = x)$coefficients)
   expected <- unname(felm(y ~ x | raw.inds[,1] + raw.inds[,2] + raw.inds[,3])$coefficients)
 
   expect_equal(actual, expected)
 })
 
 test_that("Demean should be independent of concrete values of indicators.", {
-  inds1 <- create.indicators(raw.inds)
-  inds2 <- create.indicators(new.inds)
+  ## inds1 <- create.indicators(raw.inds)
+  ## inds2 <- create.indicators(new.inds)
 
-  expected <- unname(solve.fe.model(inds1, y = y, x = x)$coefficients)
-  actual   <- unname(solve.fe.model(inds2, y = y, x = x)$coefficients)
+  expected <- unname(fastplm(ind = raw.inds, y = y, x = x)$coefficients)
+  actual   <- unname(fastplm(ind = new.inds, y = y, x = x)$coefficients)
 
   expect_equal(actual, expected)
 })
 
 test_that("Estimated fixed effects should have correct row names.", {
-  inds  <- create.indicators(new.inds)
-  model <- solve.fe.model(inds, y = y, x = x)
+  ## inds  <- create.indicators(new.inds)
+  model <- fastplm(ind = new.inds, y = y, x = x)
+  inds <- model$inds
 
   sfe.coefs <- lapply(model$sfe.coefs, function(coefs) as.list(coefs[, 1]))
   effs      <- Reduce("+", lapply(1 : length(sfe.coefs), function(col) {
@@ -39,8 +40,8 @@ test_that("Estimated fixed effects should have correct row names.", {
 })
 
 test_that("Demean without X should yield fixed effects.", {
-  inds  <- create.indicators(new.inds)
-  model <- solve.fe.model(y = effs, inds)
+  ## inds  <- create.indicators(new.inds)
+  model <- fastplm(y = effs, ind = new.inds)
 
   for (i in 1 : 3)
     expect_equal(unname(model$sfe.coefs[[i]]),
@@ -50,11 +51,13 @@ test_that("Demean without X should yield fixed effects.", {
 })
 
 test_that("Parallel demean should give identical results.", {
-  inds   <- create.indicators(new.inds)
+  ## inds   <- create.indicators(new.inds)
   models <- lapply(1 : 8, function(core.num) {
-    model <- solve.fe.model(inds, y = y, x = x, core.num = core.num)
+    model <- fastplm(ind = raw.inds, y = y, x = x, core.num = core.num)
     # "fe" contains a pointer.
     model$fe <- NULL
+    # uid is a random number
+    model$inds$uid <- NULL
     model
   })
 
@@ -63,10 +66,10 @@ test_that("Parallel demean should give identical results.", {
 })
 
 test_that("Prediction with original input should yield fitted values.", {
-  inds     <- create.indicators(new.inds)
-  model    <- solve.fe.model(inds, y = y, x = x)
-  sub.inds <- create.subindicators(new.inds, model)
-  actual   <- predict.fe.model(model, x, sub.inds)
+  ## inds     <- create.indicators(new.inds)
+  model    <- fastplm(ind = new.inds, y = y, x = x)
+  ## sub.inds <- create.subindicators(new.inds, model)
+  actual   <- predict(model, x = x, ind = new.inds)
 
   expect_equal(actual, model$fitted.values)
 })
@@ -74,18 +77,18 @@ test_that("Prediction with original input should yield fitted values.", {
 test_that("Prediction should ignore NA row(s).", {
   rows     <- sample(N, 5)
 
-  inds     <- create.indicators(new.inds)
-  model    <- solve.fe.model(inds, y = y, x = x)
-  sub.inds <- create.subindicators(new.inds, model)
-  expected <- predict.fe.model(model, x, sub.inds)
+  ## inds     <- create.indicators(new.inds)
+  model    <- fastplm(ind = new.inds, y = y, x = x)
+  ## sub.inds <- create.subindicators(new.inds, model)
+  expected <- predict(model, x = x, ind = new.inds)
 
   expected[rows, ] <- NA
 
   act.inds <- new.inds
   act.inds[rows, ] <- NA
 
-  sub.inds <- suppressWarnings(create.subindicators(act.inds, model))
-  actual   <- predict.fe.model(model, x, sub.inds)
+  ## sub.inds <- suppressWarnings(create.subindicators(act.inds, model))
+  actual <- predict(model, x = x, ind = act.inds)
 
   expect_identical(actual, expected)
 })
@@ -94,15 +97,16 @@ context("FE Model: Complex Fixed Effects")
 
 source("complex-effects.R")
 
-inds <- create.indicators(raw.inds)
+## inds <- create.indicators(raw.inds)
 
-cfe1 <- create.complex.effect(inds, 1, 2, t(as.matrix(inf2)))
-cfe2 <- create.complex.effect(inds, 2, 1, t(as.matrix(inf1)))
+## cfe1 <- create.complex.effect(inds, 1, 2, t(as.matrix(inf2)))
+## cfe2 <- create.complex.effect(inds, 2, 1, t(as.matrix(inf1)))
 
-fe   <- create.fixed.effects(inds, cfes = list(cfe1, cfe2))
+## fe   <- create.fixed.effects(inds, cfes = list(cfe1, cfe2))
 
 test_that("Demean should be correct w.r.t. lm.", {
-  model.us <- solve.fe.model(inds, y = y, x = x, fe = fe)
+  model.us <- fastplm(ind = cbind(mapped.inf(1), mapped.inf(2)), y = y, x = x, 
+                      cfe = list(c(1,2),c(2,1)), PCA = FALSE)
   model.lm <- lm(y ~ x + factor(raw.inds[, 1]) * mapped.inf(2)
                        + factor(raw.inds[, 2]) * mapped.inf(1))
 
@@ -113,9 +117,10 @@ test_that("Demean should be correct w.r.t. lm.", {
 })
 
 test_that("Prediction with original input should yield fitted values.", {
-  model    <- solve.fe.model(inds, y = y, x = x, fe = fe)
-  sub.inds <- create.subindicators(raw.inds, model)
-  actual   <- predict.fe.model(model, x, sub.inds)
+  model    <- fastplm(ind = cbind(mapped.inf(1),mapped.inf(2)), y = y, x = x, 
+                      cfe = list(c(1,2),c(2,1)), PCA = FALSE)
+  ## sub.inds <- create.subindicators(raw.inds, model)
+  actual   <- predict(model, x = x, ind = cbind(mapped.inf(1),mapped.inf(2)))
 
   expect_equal(actual, model$fitted.values)
 })

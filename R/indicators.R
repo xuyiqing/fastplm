@@ -19,6 +19,7 @@ create.indicators <- function(inds) {
 }
 
 create.subindicators <- function(sub.inds, model = NULL, inds = NULL, fe = NULL) {
+  CheckComponents <- NULL
   inds <- CHECK.INIT.INPUT(inds, "inds", function() model$inds, "indicators")
   fe   <- CHECK.INIT.INPUT(fe, "fe", function() model$fe, "fixed.effects")
   CHECK.INPUT(sub.inds, "sub.inds", "matrix")
@@ -59,6 +60,7 @@ WARN.INDS.unknown.indicator <- function(row, col, inds) {
 }
 
 WARN.INDS.cross.component <- function(error, inds, levels) {
+  group.x <- group.y <- value.x <- value.y <- NULL
   list2env(error, environment())
 
   row.str <- paste("row", valid.or.default(rownames(inds)[row], row))

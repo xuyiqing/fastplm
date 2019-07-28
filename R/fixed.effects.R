@@ -1,4 +1,5 @@
 locate.effect <- function(inds, id) {
+  ERR.locate.effect <- NULL
   if (mode(id) == "numeric") {
     if (!is.null(inds[id]))
       return(as.integer(id))
@@ -38,6 +39,8 @@ create.complex.effect <- function(inds, eff, inf, weight) {
 }
 
 create.fixed.effects <- function(inds, sfes = NULL, cfes = NULL) {
+  CreateFixedEffects <- ContainMultipleComponents <- NULL
+
   CHECK.INPUT(inds, "inds", "indicators")
   CHECK.INPUT(cfes, "cfes", "list of cfes",
     check.type = function(cfes) {

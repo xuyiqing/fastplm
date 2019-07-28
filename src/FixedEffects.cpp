@@ -95,7 +95,8 @@ void demean(void* ptr) {
 
         double epsilon = arma::accu(arma::abs(casted.data - casted.backup));
         if (isnan(epsilon))
-            exit(-1);
+            //exit(-1);
+            Rcpp::stop("Demean Fails.\n");
         if (epsilon < casted.epsilon)
             return;
         i ++;
