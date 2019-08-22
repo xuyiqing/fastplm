@@ -7,6 +7,7 @@ fastplm.boot <- function(seed,
                          cluster,
                          parallel = FALSE,
                          wild = FALSE, 
+                         jackknife = FALSE,
                          refinement = FALSE, 
                          pos = NULL,
                          nboots, 
@@ -16,6 +17,10 @@ fastplm.boot <- function(seed,
         set.seed(seed)
     }
     p <- dim(x)[2]
+
+    if (jackknife == 1) {
+        wild <- 0
+    }
 
     ## se <- ifelse(refinement == 1, 1, 0) 
     ## model.cl <- ifelse(refinement == 1, cluster, NULL)
@@ -171,13 +176,24 @@ fastplm.boot <- function(seed,
     } else {    
         
         core.num <- ifelse(parallel == TRUE, 1, core.num)
+
         ## non-parametric bootstrap
-        if (is.null(cluster)) {
+        if (jackknife ==1 || is.null(cluster)) {
             ## non-parametric bootstrap
+            jack.pos <- 1
+            if (jackknife == 1) {
+                nboots <- length(unique(ind[,1]))
+                jack.pos <- as.numeric(as.factor(ind[,1]))
+            }
             boot.coef <- matrix(NA, p, nboots)
 
-            one.boot <- function() {
-                boot.id <- sample(1:dim(y)[1], dim(y)[1], replace = TRUE)
+            one.boot <- function(num = NULL) {
+                if (is.null(num)) {
+                    boot.id <- sample(1:dim(y)[1], dim(y)[1], replace = TRUE)
+                } else {
+                    boot.id <- (1:dim(y)[1])[which(jack.pos != num)]
+                }
+                
 
                 boot.model <- try(fastplm.core(y = as.matrix(y[boot.id,]), 
                                                x = as.matrix(x[boot.id,]), 
@@ -190,6 +206,11 @@ fastplm.boot <- function(seed,
                     return(c(boot.model$coefficients))
                 }
             }
+
+            boot.seq <- NULL
+            if (jackknife == 1) {
+                boot.seq <- unique(jack.pos)
+            }
             
             if (parallel == TRUE) {
                 boot.out <- foreach(j = 1:nboots, 
@@ -197,22 +218,28 @@ fastplm.boot <- function(seed,
                                     .export = c("fastplm.core"),
                                     .packages = c("fastplm")
                                     ) %dopar% {
-                                        return(one.boot())
+                                        return(one.boot(boot.seq[j]))
                                     }
                 for (j in 1:nboots) { 
                     boot.coef[, j] <- c(boot.out[[j]])
                 }
             } else {
                 for (i in 1:nboots) {
-                    boot.coef[, i] <- one.boot()
+                    boot.coef[, i] <- one.boot(boot.seq[i])
                 }
             }
 
-            P_x <- as.matrix(apply(boot.coef, 1, get.pvalue))
-            stderror <- as.matrix(apply(boot.coef, 1, sd, na.rm = TRUE))
-            CI <- t(apply(boot.coef, 1, quantile, c(0.025, 0.975), na.rm = TRUE))
-            ## rewrite uncertainty estimates
-            est.coefficients <- cbind(model$coefficients, stderror, P_x, CI)
+            if (jackknife == 0) {
+                P_x <- as.matrix(apply(boot.coef, 1, get.pvalue))
+                stderror <- as.matrix(apply(boot.coef, 1, sd, na.rm = TRUE))
+                CI <- t(apply(boot.coef, 1, quantile, c(0.025, 0.975), na.rm = TRUE))
+                ## rewrite uncertainty estimates
+                est.coefficients <- cbind(model$coefficients, stderror, P_x, CI)
+            } else {
+                beta.j <- jackknifed(model$coefficients, boot.coef, 0.05)
+                est.coefficients <- cbind(model$coefficients, beta.j$se, beta.j$P, beta.j$CI.l, beta.j$CI.u)
+
+            }
             colnames(est.coefficients) <- c("Coef", "Std. Error", "P Value", "CI_lower", "CI_upper")
             model$est.coefficients <- est.coefficients
         
@@ -451,7 +478,43 @@ fastplm.boot <- function(seed,
 
             }
         }
+        
+
     }
 
     return(model)
+}
+
+
+
+## jackknife se
+jackknifed <- function(x,  ## ols estimates
+                       y,
+                       alpha) { ## sub-sample ols estimates) 
+
+    p <- length(x)
+    N <- dim(y)[2]  ## sample size
+    if (N == 1) {
+        y <- t(y)
+        N <- dim(y)[2]
+    }
+
+    X <- matrix(rep(c(x), N), p, N) * N
+    Y <- X - y * (N - 1)
+
+    Yvar <- apply(Y, 1, var, na.rm = TRUE)
+    vn <- N - apply(is.na(y), 1, sum) 
+
+    Ysd <- sqrt(Yvar/vn)  ## jackknife se
+
+    CI.l <- Ysd * qnorm(alpha/2) + c(x)
+    CI.u <- Ysd * qnorm(1 - alpha/2) + c(x)
+
+    ## wald test
+    P <- 2 * min(1 - pnorm(c(x)/Ysd), pnorm(c(x)/Ysd))
+
+    out <- list(se = Ysd, CI.l = CI.l, CI.u = CI.u, P = P)
+
+    return(out)
+    
 }

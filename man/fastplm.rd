@@ -71,8 +71,8 @@
   \item{vce}{A character value indicating type for variance estimator. 
     Choose from: "standard" for standard ols standard errors, "robust" for 
     the Huber White robust standard errors (default value), "clustered" (or "cl") 
-    for clustered standard errors and "bootstrap" (or "boot") for bootstrapped 
-    standard errors.}
+    for clustered standard errors, "jackknife" for jackknife standard errors, 
+    and "bootstrap" (or "boot") for bootstrapped standard errors.}
 
   \item{cluster}{A character value of the clustered variable(s) in the data frame if 
     \code{formula} is provided or a matrix object of the clustered variable(s) for 

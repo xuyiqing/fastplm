@@ -9,7 +9,7 @@ fastplm <- function(formula = NULL, ##
                     cfe = NULL, ## index for complex fe, a list of double, e.g. c(effect, influence)
                     PCA = TRUE,
                     se = 1, ## uncertainty estimates for covariates
-                    vce = "robust", ## standard, robust, clustered, bootstrap
+                    vce = "robust", ## standard, robust, clustered, bootstrap, jackknife
                     cluster = NULL, ## cluster name
                     wild = FALSE,
                     refinement = FALSE,
@@ -197,13 +197,13 @@ fastplm.default <- function(formula = NULL, ##
     bootstrap <- 0
     if (se == 1) {
         if (p == 0) {
-            cat("No covariates.\n")
+            ## cat("No covariates.\n")
             refinement <- 0
             se <- 0
             bootstrap <- 0
         }
-        if (!vce %in% c("standard", "clustered", "robust", "bootstrap")) {
-            stop("Choose \" vce \" from c(\" standard \", \" robust \", \" clustered \", \" bootstrap \").\n")
+        if (!vce %in% c("standard", "clustered", "robust", "bootstrap", "jackknife")) {
+            stop("Choose \" vce \" from c(\" standard \", \" robust \", \" clustered \", \" jackknife \", \" bootstrap \").\n")
         } else {
             if (vce == "standard") {
                 cat("Please consider clustering the standard errors or using block bootstraps.\n")
@@ -211,7 +211,7 @@ fastplm.default <- function(formula = NULL, ##
             else if (vce == "robust") {
                 robust <- 1
             }
-            else if (vce == "bootstrap") {
+            else if (vce %in% c("bootstrap", "jackknife")) {
                 bootstrap <- 1
             }
         }
@@ -339,29 +339,34 @@ fastplm.default <- function(formula = NULL, ##
                 variance.type <- "Clustered"
             }
         } else { ## bootstrap
-            if (is.null(cluster)) {
-                if (wild == 0) {
-                    variance.type <- "Non-parametric Bootstrap"
-                } else {
-                    variance.type <- "Wild Bootstrap"
-                }
+            if (vce == "jackknife") {
+                variance.type <- "Jackknife"
             } else {
-                if (wild == 0) {
-                    if (refinement == 0) {
-                        variance.type <- "Cluster Bootstrap"
+                if (is.null(cluster)) {
+                    if (wild == 0) {
+                        variance.type <- "Non-parametric Bootstrap"
                     } else {
-                        variance.type <- "Clustered"
-                        refinement.type <- "Percentile-t Bootstrap Refinement"
+                        variance.type <- "Wild Bootstrap"
                     }
                 } else {
-                    if (refinement == 0) {
-                        variance.type <- "Wild Cluster Bootstrap"
+                    if (wild == 0) {
+                        if (refinement == 0) {
+                            variance.type <- "Cluster Bootstrap"
+                        } else {
+                            variance.type <- "Clustered"
+                            refinement.type <- "Percentile-t Bootstrap Refinement"
+                        }
                     } else {
-                        variance.type <- "Clustered"
-                        refinement.type <- "Wild Cluster Bootstrap Refinement"
+                        if (refinement == 0) {
+                            variance.type <- "Wild Cluster Bootstrap"
+                        } else {
+                            variance.type <- "Clustered"
+                            refinement.type <- "Wild Cluster Bootstrap Refinement"
+                        }
                     }
                 }
-            }
+
+            }        
         }
     }
 
@@ -378,10 +383,12 @@ fastplm.default <- function(formula = NULL, ##
             registerDoParallel(para.clusters)
             cat("Parallel computing ...\n")
         }
+        jackknife <- ifelse(vce == "jackknife", 1, 0)
+
         model <- fastplm.boot(seed = seed, y = y, x = x, ind = ind, 
                               sfe.index = sfe.index, cfe.index = cfe.index, 
                               cluster = cluster, parallel = parallel,
-                              wild = wild, 
+                              wild = wild, jackknife = jackknife,
                               refinement = refinement, pos = pos,  
                               nboots = nboots, core.num = core.num)
         if (parallel == TRUE) {

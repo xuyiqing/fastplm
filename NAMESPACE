@@ -1,7 +1,7 @@
 useDynLib(fastplm, .registration = TRUE)
 importFrom(Rcpp, evalCpp)
 importFrom("stats", "na.omit", "sd", "prcomp", "pf", "pt", 
-           "pnorm", "qnorm", "quantile")
+           "pnorm", "qnorm", "quantile", "var")
 importFrom("foreach","foreach","%dopar%")
 importFrom("doParallel","registerDoParallel")
 importFrom("parallel", "detectCores", "stopCluster", "makeCluster")
