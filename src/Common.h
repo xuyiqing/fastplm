@@ -9,6 +9,7 @@
 using std::experimental::optional;
 
 
+
 class ScopeGuard {
 private:
     std::function<void()> toCall;

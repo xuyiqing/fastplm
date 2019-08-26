@@ -8,6 +8,9 @@ fastplm <- function(formula = NULL, ##
                     sfe = NULL, ## index for simple fe , a vector of integer
                     cfe = NULL, ## index for complex fe, a list of double, e.g. c(effect, influence)
                     PCA = TRUE,
+                    sp = NULL,
+                    knots = NULL, ## b-spline
+                    degree = 3, ## order of curve
                     se = 1, ## uncertainty estimates for covariates
                     vce = "robust", ## standard, robust, clustered, bootstrap, jackknife
                     cluster = NULL, ## cluster name
@@ -32,6 +35,9 @@ fastplm.formula <- function(formula = NULL, ##
                             sfe = NULL, ## index for simple fe , a vector of integer
                             cfe = NULL, ## index for complex fe, a list of double, e.g. c(effect, influence)
                             PCA = TRUE,
+                            sp = NULL,
+                            knots = NULL, ## b-spline
+                            degree = 3, ## order of curve
                             se = 1, ## uncertainty estimates for covariates
                             vce = "robust", ## standard, robust, clustered
                             cluster = NULL, ## cluster name
@@ -52,14 +58,20 @@ fastplm.formula <- function(formula = NULL, ##
             stop("\"cluster\" should be a character value.\n")
         }
     }
+    if (!is.null(sp)) {
+        if (class(sp) != "character") {
+            stop("\"sp\" should be a character value.\n")
+        }
+    }
+
     data.name <- names(data)
-    all.name <- unique(c(varnames,index,cluster))
+    all.name <- unique(c(varnames,index,cluster,sp))
     for (i in 1:length(all.name)) {
         if (!all.name[i] %in% data.name) {
             stop(paste("variable ", all.name[i], " is not in the dataset.\n", sep = ""))
         }
     }
-    data <- data[,unique(c(varnames,index,cluster))]
+    data <- data[,unique(c(varnames,index,cluster,sp))]
     if (sum(is.na(data)) > 0) {
         data <- na.omit(data)
     }
@@ -74,6 +86,11 @@ fastplm.formula <- function(formula = NULL, ##
     cluster.level <- cluster
     if (!is.null(cluster)) {
         cluster <- as.matrix(data[, cluster])
+    }
+    if (!is.null(sp)) {
+        sp.name <- sp
+        sp <- as.matrix(data[, sp])
+        colnames(sp) <- sp.name
     }
     ## data <- as.matrix(data[, varnames])
     ## colnames(data) <- varnames
@@ -96,7 +113,9 @@ fastplm.formula <- function(formula = NULL, ##
                            index = index, y = y, 
                            x = x, ind = ind, 
                            sfe = sfe, cfe = cfe,
-                           PCA = PCA, se = se, vce = vce,
+                           PCA = PCA, sp = sp,
+                           knots = knots, degree = degree, 
+                           se = se, vce = vce,
                            cluster = cluster, 
                            wild = wild, refinement = refinement, 
                            test_x = test_x, 
@@ -120,6 +139,9 @@ fastplm.default <- function(formula = NULL, ##
                             sfe = NULL, ## index for simple fe , a vector of integer
                             cfe = NULL, ## index for complex fe, a list of double, e.g. c(effect, influence)
                             PCA = TRUE,
+                            sp = NULL,
+                            knots = NULL, ## b-spline
+                            degree = 3, ## order of curve
                             se = 1, ## uncertainty estimates for covariates
                             vce = "robust", ## standard, robust, clustered
                             cluster = NULL, ## cluster in default is a column vector
@@ -167,7 +189,7 @@ fastplm.default <- function(formula = NULL, ##
     }
 
     ## number of covariates
-    p <- ifelse(is.null(x), 0, dim(x)[2])
+    p.old <- p <- ifelse(is.null(x), 0, dim(x)[2])
     #if (sum(is.na(y)) > 0) {
     #    stop("Missing values in dependent variable.\n")
     #}
@@ -176,6 +198,42 @@ fastplm.default <- function(formula = NULL, ##
     #        stop("Missing values in covariates.\n")
     #    }
     #}
+
+    ## ------ b-spline ----- ##
+    ## bsp <- 0
+    sp.name <- NULL
+    if (!is.null(sp)) {
+        if (!class(sp) %in% c("matrix", "numeric", "integer")) {
+            stop("\"sp\" must be a numeric vector.\n")
+        }
+        if (class(sp) != "matrix") {
+            sp <- as.matrix(sp)
+        }
+        sp.name <- colnames(sp)
+        ## bsp <- 1
+    }
+
+    sp.raw <- sp.matrix <- NULL
+    if (!is.null(sp)) {
+        get.sp <- try(bs(c(sp), knots = knots, degree = degree, 
+                      intercept = FALSE), silent = TRUE)
+
+        if ('try-error' %in% class(get.sp)) {
+            stop("Cannot generate matrix for b-spline curve.\n")
+        } else {
+            sp.matrix <- as.matrix(get.sp)
+            
+            ## gen reference level 
+            ref.pos <- !duplicated(c(sp))
+            sp.ref <- c(sp)[ref.pos]
+            sp.matrix.ref <- sp.matrix[ref.pos,]
+
+            sp.raw <- list(sp.ref = sp.ref, sp.matrix.ref = sp.matrix.ref)
+
+        }
+        x <- cbind(x, sp.matrix)
+        p <- dim(x)[2]
+    }
 
     ## index 
     if (is.null(ind)) {
@@ -198,9 +256,13 @@ fastplm.default <- function(formula = NULL, ##
     if (se == 1) {
         if (p == 0) {
             ## cat("No covariates.\n")
-            refinement <- 0
             se <- 0
             bootstrap <- 0
+            refinement <- 0
+        } else {
+            if (p.old == 0) {
+                refinement <- 0
+            }
         }
         if (!vce %in% c("standard", "clustered", "robust", "bootstrap", "jackknife")) {
             stop("Choose \" vce \" from c(\" standard \", \" robust \", \" clustered \", \" jackknife \", \" bootstrap \").\n")
@@ -268,11 +330,12 @@ fastplm.default <- function(formula = NULL, ##
             stop("Please specify only one variable of interest.\n")
         }
         if (class(test_x) == "character") {
-            pos <- which(colnames(data)[2:(p+1)] == test_x)
+            pos <- which(colnames(data)[2:(p.old+1)] == test_x)
         } else {
             pos <- test_x
         }
     }
+
 
     ## ------ fe ------- ## 
     num.sfe.index <- num.cfe.index <- NULL
@@ -402,25 +465,55 @@ fastplm.default <- function(formula = NULL, ##
     model$PCA <- PCA
 
     if (p > 0 & !is.null(colnames(data))) {
-        rownames(model$coefficients) <- colnames(data)[2:(p+1)]
+
+        x.name <- NULL
+        if (p.old > 0) {
+            x.name <- colnames(data)[2:(p.old+1)]
+        }
+        
+        sp.length <- p - p.old
+        sp.name2 <- NULL
+        if (sp.length > 0) {
+            for (i in 1:sp.length) {
+                sp.name2 <- c(sp.name2, paste("sp", i, sep = ""))
+            }
+        }
+        cov.name <- c(x.name, sp.name2)
+
+        #cat("\n")
+        #cat(p.old)
+        #cat("\n")
+
+        #cat("\n")
+        #cat(class(x.name))
+        #cat("\n")
+
+        rownames(model$coefficients) <- cov.name
         if (se == 1) {
-            rownames(model$est.coefficients) <- colnames(data)[2:(p+1)]
+            rownames(model$est.coefficients) <- cov.name
         }
         if (!is.null(model$refinement)) {
             if(wild == FALSE) {
-                rownames(model$refinement$wald.refinement) <- colnames(data)[2:(p+1)]
+                rownames(model$refinement$wald.refinement) <- colnames(data)[2:(p.old+1)]
             } else {
-                rownames(model$refinement$wald.refinement) <- colnames(data)[2:(p+1)][pos]
+                rownames(model$refinement$wald.refinement) <- colnames(data)[2:(p.old+1)][pos]
             }
         }
+    }
+
+    if (!is.null(index)) {
+        model$inds$effect.names <- index
     }
 
     model <- c(model, list(call = match.call(),
                            n.cluster = n.cluster,
                            variance.type = variance.type,
-                           refinement.type = refinement.type))
+                           refinement.type = refinement.type,
+                           sp.raw = sp.raw,
+                           sp.name = sp.name))
     class(model) <- "fastplm"
     model
+
 }
 
 name.fe.model <- function(model, inds, fe) {
@@ -443,23 +536,68 @@ name.fe.model <- function(model, inds, fe) {
 
 ## ------- method -------- ##
 ## predict
-predict.fastplm <- function(object, data = NULL, x = NULL, ind, ...) {
+predict.fastplm <- function(object, data = NULL, x = NULL, 
+                                    sp = NULL, ind = NULL, ...) {
     model <- object
     CHECK.INPUT(model, "model", "fastplm")
+
+    sp.raw <- model$sp.raw
+    sp.ref <- sp.matrix.ref <- NULL
+    p.sp <- 0
+    if (!is.null(sp.raw)) {
+        sp.ref <- sp.raw$sp.ref
+        sp.matrix.ref <- sp.raw$sp.matrix.ref
+        p.sp <- dim(sp.matrix.ref)[2]
+    }
+    
+    
     if (!is.null(data)) { ## receive a dataframe
+        
         coef <- model$coefficients
-        if (is.null(coef)) {
-            x <- NULL
-        } else {
-            x.name <- rownames(coef)
-            if (is.null(x.name)) {
-                stop("No covariate names in the model.")
+        if (is.null(rownames(coef))) {
+            stop("Cannot receive a data frame. Try matrix.\n")
+        }
+        p <- 0
+        if (!is.null(coef)) {
+            p <- length(c(coef))
+        }
+        ## p <- ifelse(is.null(coef), 0, length(c(coef)))
+
+        x <- NULL
+        if (!is.null(coef)) {
+
+            if (p == p.sp) {
+                x <- NULL
             } else {
+                x.name <- rownames(coef)[1:(p - p.sp)]
                 if (sum(x.name %in% names(data)) < length(x.name)) {
                     stop("The dataset doesn\'t contain some covariates in the model.")
                 } else {
                     x <- as.matrix(data[, x.name])
                 }
+            }
+            
+            sp.matrix <- NULL
+            sp.name <- model$sp.name
+            if (!is.null(sp.name)) {
+                if (!is.null(sp.raw)) {
+                    sp.ind <- data[, sp.name]
+                    sp.pos <- sapply(1:length(sp.ind), function(vec){return(which(sp.ref == sp.ind[vec]))})
+                    sp.matrix <- sp.matrix.ref[sp.pos, ]
+                }
+            }
+            x <- cbind(x, sp.matrix)
+
+            #cat("\n")
+            #cat(dim(x)[2])
+            #cat("\n")
+
+            #cat("\n")
+            #cat(dim(coef)[1])
+            #cat("\n")
+
+            if (dim(x)[2] != p) {
+                stop("The number of covariates should be the same as that in the model.")
             }
         }
 
@@ -469,17 +607,35 @@ predict.fastplm <- function(object, data = NULL, x = NULL, ind, ...) {
         } else {
             ind <- as.matrix(data[, ind.name])
         }
+
     } else { ## receive matrix
 
         if (!is.null(x)) {
             CHECK.INPUT(x, "x", "matrix")
-            coef <- model$coefficients 
-            if (is.null(coef)) {
-                stop("There is not any covariate in the model.")
-            } else {
-                if (dim(coef)[1] != dim(x)[2]) {
-                    stop("The number of covariates should be the same as that in the model.")
-                }
+        }
+
+        sp.matrix <- NULL
+        if (!is.null(sp)) {
+            ## CHECK.INPUT(sp, "sp", "matrix")
+            sp <- c(sp)
+            if (!is.null(sp.raw)) {
+                sp.pos <- sapply(1:length(sp), function(vec){return(which(sp.ref == sp[vec]))})
+                sp.matrix <- sp.matrix.ref[sp.pos, ]
+            }
+
+        }
+
+        x <- cbind(x, sp.matrix)
+
+        coef <- model$coefficients 
+
+        
+
+        if (is.null(coef)) {
+            stop("There is not any covariate in the model.")
+        } else {
+            if (dim(coef)[1] != dim(x)[2]) {
+                stop("The number of covariates should be the same as that in the model.")
             }
         }
 

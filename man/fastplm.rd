@@ -7,7 +7,8 @@
 \usage{fastplm(formula = NULL, data = NULL, index = NULL, 
                y = NULL, x = NULL, ind = NULL, 
                sfe = NULL, cfe = NULL, 
-               PCA = TRUE, se = 1, vce = "robust", 
+               PCA = TRUE, sp = NULL, knots = NULL, 
+               degree = 3, se = 1, vce = "robust", 
                cluster = NULL, wild = FALSE,
                refinement = FALSE, test_x = NULL, parallel = FALSE, 
                nboots = 200, seed = NULL, core.num = 1)}
@@ -64,6 +65,15 @@
 
   \item{PCA}{A logical flag indicating whether to perform principal components analysis 
     for influence in complex fixed effects (see \code{cfe}).}
+
+  \item{sp}{A character value or a numeric vector specifying the variable for 
+    fitting a b-spline curve.}
+
+  \item{knots}{A numeirc value specifying the knots point for \code{sp}. If 
+    left blank, a polynomial curve will be fitted.}
+
+  \item{degree}{A positive integer speficying the order of the spline curve. 
+    Default value is \code{degree = 3} for a cubic curve.}
 
   \item{se}{A logical flag indicating whether uncertainty estimates of 
     covariates will be produced.}

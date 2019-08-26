@@ -62,7 +62,7 @@ fastplm.boot <- function(seed,
             y.fit <- y - res 
             core.num <- ifelse(parallel == TRUE, 1, core.num)
 
-            one.boot <- function() {
+            one.boot <- function(num = NULL) {
                 
                 if (!is.null(cluster)) {
                     ## wild boot by cluster 
@@ -131,7 +131,7 @@ fastplm.boot <- function(seed,
             ## bootstrap refinement: wald
             core.num <- ifelse(parallel == TRUE, 1, core.num)
 
-            one.boot <- function() {
+            one.boot <- function(num = NULL) {
                 ## wild boot by cluster 
                 res.p.level <- sample(c(-1, 1), length(level.cluster), replace = TRUE)
                 res.p <- c()
@@ -257,7 +257,7 @@ fastplm.boot <- function(seed,
                     ## level.count <- table(raw.cluster)
                     split.id <- split(1:dim(y)[1], raw.cluster)
 
-                    one.boot <- function() {
+                    one.boot <- function(num = NULL) {
                         level.id <- sample(level.cluster, length(level.cluster), replace = TRUE)
                         boot.id <- c()
                         for (j in 1:length(level.id)) {
@@ -318,7 +318,7 @@ fastplm.boot <- function(seed,
                     split.id2 <- split(1:dim(y)[1], raw.cluster2)
                     split.id3 <- split(1:dim(y)[1], raw.cluster3)
 
-                    one.boot <- function() {
+                    one.boot <- function(num = NULL) {
                         ## level 1
                         level.id1 <- sample(level.cluster1, length(level.cluster1), replace = TRUE)
                         boot.id1 <- c()
@@ -426,7 +426,7 @@ fastplm.boot <- function(seed,
                 level.count <- table(raw.cluster)
                 split.id <- split(1:dim(y)[1], raw.cluster)
 
-                one.boot <- function() {
+                one.boot <- function(num = NULL) {
                     level.id <- sample(level.cluster, length(level.cluster), replace = TRUE)
                     boot.id <- c()
                     boot.cluster <- c()
@@ -511,7 +511,13 @@ jackknifed <- function(x,  ## ols estimates
     CI.u <- Ysd * qnorm(1 - alpha/2) + c(x)
 
     ## wald test
-    P <- 2 * min(1 - pnorm(c(x)/Ysd), pnorm(c(x)/Ysd))
+    P <- NULL
+    for (i in 1:p) {
+        subz <- pnorm(c(x)[i]/Ysd[i])
+        P <- c(P, 2 * min(1 - subz, subz))
+    }
+
+    ## P <- 2 * min(1 - pnorm(c(x)/Ysd), pnorm(c(x)/Ysd))
 
     out <- list(se = Ysd, CI.l = CI.l, CI.u = CI.u, P = P)
 

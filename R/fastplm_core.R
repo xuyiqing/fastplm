@@ -169,7 +169,13 @@ fastplm.core <- function(y = NULL, ## outcome vector
             }
             ## stderror <- as.matrix(sqrt(sig2*diag(invx)))
             Tx <- c(model$coefficients)/c(stderror)
-            P_t <- 2 * min(1 - pt(Tx, df), pt(Tx, df))
+
+            P_t <- NULL
+            for (i in 1:length(Tx)) {
+                subt <- pt(Tx[i], df)
+                P_t <- c(P_t, 2 * min(1 - subt, subt))
+            } 
+        
             CI <- cbind(c(model$coefficients) - qnorm(0.975)*c(stderror), c(model$coefficients) + qnorm(0.975)*c(stderror))
 
             model$df <- df
@@ -237,7 +243,14 @@ fastplm.core <- function(y = NULL, ## outcome vector
 
             ## wald test 
             Zx <- c(model$coefficients)/c(stderror)
-            P_z <- 2 * min(1 - pnorm(Zx), pnorm(Zx))
+
+            P_z <- NULL
+            for (i in 1:length(Zx)) {
+                subz <- pnorm(Zx)
+                P_z <- c(P_z, 2 * min(1 - subz, subz))
+            } 
+
+            ## P_z <- 2 * min(1 - pnorm(Zx), pnorm(Zx))
             CI <- cbind(c(model$coefficients) - qnorm(0.975)*c(stderror), c(model$coefficients) + qnorm(0.975)*c(stderror))
             est.coefficients <- cbind(model$coefficients, stderror, Zx, P_z, CI)
             colnames(est.coefficients) <- c("Coef", "Std. Error", "Z value", "Pr(>|Z|)", "CI_lower", "CI_upper")
