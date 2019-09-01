@@ -5,6 +5,9 @@
 \alias{create.fixed.effects}
 \alias{fastplm.core}
 \alias{SolveFixedEffects}
+\alias{ContainMultipleComponents}
+\alias{CheckComponents}
+\alias{CreateFixedEffects}
 
 
 \title{Internal Fastplm Functions}
