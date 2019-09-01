@@ -4,6 +4,7 @@
 \alias{create.complex.effect}
 \alias{create.fixed.effects}
 \alias{fastplm.core}
+\alias{SolveFixedEffects}
 
 
 \title{Internal Fastplm Functions}
