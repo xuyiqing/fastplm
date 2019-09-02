@@ -1,13 +1,13 @@
 #ifndef FASTPLM_COMMON_H
 #define FASTPLM_COMMON_H
 
+// [[Rcpp::plugins(cpp17)]]
 #include <array>
 #include <vector>
 #include <functional>
-#include <experimental/optional>
+#include <optional>
 
-using std::experimental::optional;
-
+using std::optional;
 
 
 class ScopeGuard {

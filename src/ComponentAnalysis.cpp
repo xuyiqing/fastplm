@@ -66,9 +66,9 @@ optional<ComponentTables> computeComponents(const arma::uvec& groupSizes, const 
     });
 
     if (distinctGroups.size() <= 1)
-        return std::experimental::nullopt;
+        return std::nullopt;
 
-    return std::experimental::make_optional(tables);
+    return std::make_optional(tables);
 }
 
 std::vector<CrossComponentError> checkComponents(const ComponentTables& tables, const arma::umat& indicators) {

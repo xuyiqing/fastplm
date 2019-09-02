@@ -12,6 +12,6 @@ LazyData: true
 Imports: Rcpp (>= 0.12.9), doParallel (>= 1.0.10), foreach (>= 1.4.3)
 LinkingTo: Rcpp, RcppArmadillo, testthat
 Suggests: testthat
-SystemRequirements: C++14
+SystemRequirements: C++17
 NeedsCompilation: yes
 Packaged: 2018-12-28

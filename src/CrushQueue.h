@@ -1,6 +1,7 @@
 #ifndef FASTPLM_CRUSH_QUEUE_H
 #define FASTPLM_CRUSH_QUEUE_H
 
+// [[Rcpp::plugins(cpp17)]]
 #include <iostream>
 #include <atomic>
 #include <vector>
