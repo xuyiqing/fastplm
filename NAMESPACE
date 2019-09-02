@@ -6,7 +6,6 @@ importFrom("foreach","foreach","%dopar%")
 importFrom("doParallel","registerDoParallel")
 importFrom("parallel", "detectCores", "stopCluster", "makeCluster")
 importFrom("splines", "bs")
-importFrom("fastplm", "CreateFixedEffects", "ContainMultipleComponents", "CheckComponents", "SolveFixedEffects")
 ##importFrom("lfe", "felm")
 
 ##export(create.indicators)
