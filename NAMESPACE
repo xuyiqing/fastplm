@@ -13,7 +13,6 @@ importFrom("splines", "bs")
 ##export(create.complex.effect)
 ##export(create.fixed.effects)
 ##export(SolveFixedEffects)
-export(CreateFixedEffects)
 
 ##export(fastplm.core)
 export(fastplm)
