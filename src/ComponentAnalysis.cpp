@@ -76,7 +76,7 @@ std::vector<CrossComponentError> checkComponents(const ComponentTables& tables, 
 
     for (auto row = 0u; row < indicators.n_rows; row ++) {
         for (auto col = 0u; col < indicators.n_cols - 1; col ++) {
-            if (isnan(indicators(row, col)))
+            if (std::isnan(indicators(row, col)))
                 break;
 
             ID x = indicators(row, col);
