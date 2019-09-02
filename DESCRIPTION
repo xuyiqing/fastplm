@@ -1,0 +1,17 @@
+Package: fastplm
+Type: Package
+Title: Fast Fixed Effect Algorithm
+Version: 1.0.7
+Author: Yiqing Xu, Minsheng Liu
+Maintainer: Yiqing Xu <yiqingxu@ucsd.edu>
+Description: Fast solver for panel data with fixed effects.
+    This package is Still at early stage of development.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 0.12.9), doParallel (>= 1.0.10), foreach (>= 1.4.3)
+LinkingTo: Rcpp, RcppArmadillo, testthat
+Suggests: testthat
+SystemRequirements: C++14
+NeedsCompilation: yes
+Packaged: 2018-12-28
