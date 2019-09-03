@@ -1,18 +1,2 @@
-build/
 
-*.o
-*.so
 .DS_Store
-
-**/.Rproj.user/
-**/.Rhistory
-**/.RData
-**/.Ruserdata
-**/.Rbuildignore
-**/RcppExports.cpp
-**/RcppExports.R
-.Rproj.user
-
-src/symbols.rds
-
-debug/Debug.cpp

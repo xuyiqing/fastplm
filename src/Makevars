@@ -1,0 +1,4 @@
+
+CXX17FLAGS=-O3 -Wno-unused-variable -Wno-unused-function
+CXX17 = $(BINPREF)gnu++ -m$(WIN) -std=c++17
+CXX17FLAGS=-O3 -Wno-unused-variable -Wno-unused-function
