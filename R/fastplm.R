@@ -631,13 +631,20 @@ predict.fastplm <- function(object, data = NULL, x = NULL,
 
         
 
-        if (is.null(coef)) {
-            stop("There is not any covariate in the model.")
-        } else {
-            if (dim(coef)[1] != dim(x)[2]) {
-                stop("The number of covariates should be the same as that in the model.")
-            }
+        #if (!is.null(x)) {
+        #    if (dim(coef)[1] == 0) {
+        #        stop("There is not any covariate in the model.")
+        #    } else {
+        #        if (dim(coef)[1] != dim(x)[2]) {
+        #            stop("The number of covariates should be the same as that in the model.")
+        #        }
+        #    }
+        #}
+
+        if (!is.null(x)) {
+            ASSERT.MATRIX.DIM(x, "x", length(model$coefficients), is.width = TRUE)
         }
+        
 
         if (dim(ind)[2] != length(model$inds$effect.names)) {
             stop("The number of indicators should be the same as that in the model.")
