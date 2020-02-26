@@ -94,7 +94,7 @@ void demean(void* ptr) {
             casted.complexDeltas[i] += effects.complexEffects[i].demean(casted.data);
 
         double epsilon = arma::accu(arma::abs(casted.data - casted.backup));
-        if (isnan(epsilon))
+        if (std::isnan(epsilon))
             //exit(-1);
             Rcpp::stop("Demean Fails.\n");
         if (epsilon < casted.epsilon)
