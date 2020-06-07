@@ -2,6 +2,8 @@
 
 #include "CrushQueue.h"
 #include "FixedEffects.h"
+#include <cmath>
+using std::isnan;
 
 std::unique_ptr<const FixedEffects> FixedEffects::create(const arma::uvec& levelCounts, const arma::mat& indsR, const arma::uvec& simpleEffects, const arma::uvec& complexEffects, const arma::uvec& complexInfluences, const std::vector<arma::mat>& weights) {
     auto effects = std::make_unique<FixedEffects>();

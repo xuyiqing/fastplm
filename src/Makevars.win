@@ -1,4 +1,4 @@
-
+PKG_LIBS:=-L$(R_HOME)/bin$(R_ARCH) -lRblas -lRlapack
 CXX17FLAGS=-O3 -Wno-unused-variable -Wno-unused-function
 CXX17 = $(BINPREF)g++ -m$(WIN) -std=c++17
 CXX17FLAGS=-O3 -Wno-unused-variable -Wno-unused-function

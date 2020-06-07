@@ -370,7 +370,7 @@ fastplm.default <- function(formula = NULL, ##
         ## pca for correlated factors
         if (PCA == TRUE) {
             raw.influence.index <- unique(sapply(1:cfe.length, function(i)cfe.index[[i]][2]))
-            raw.influence <- as.matrix(ind[,raw.influence.index])
+            
 
             pc.influence <- prcomp(raw.influence)$x ## pca
             ## qr.influence <- qr(raw.influence)
