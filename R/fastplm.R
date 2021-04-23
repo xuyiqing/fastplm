@@ -442,7 +442,7 @@ fastplm.default <- function(formula = NULL, ##
     } else {
       
         if (parallel == TRUE) {
-            para.clusters <- makeCluster(core.num)
+            para.clusters <- future::makeClusterPSOCK(core.num)
             registerDoParallel(para.clusters)
             cat("Parallel computing ...\n")
         }

@@ -10,7 +10,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: Rcpp (>= 0.12.9), doParallel (>= 1.0.10), foreach (>= 1.4.3)
-LinkingTo: Rcpp, RcppArmadillo, testthat
+LinkingTo: Rcpp, RcppArmadillo, testthat, future
 Suggests: testthat
 SystemRequirements: C++17
 NeedsCompilation: yes
