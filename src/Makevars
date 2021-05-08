@@ -2,3 +2,5 @@
 CXX17FLAGS=-O3 -Wno-unused-variable -Wno-unused-function
 CXX17 = $(BINPREF)gnu++ -m$(WIN) -std=c++17
 CXX17FLAGS=-O3 -Wno-unused-variable -Wno-unused-function
+PKG_CXXFLAGS = $(SHLIB_CXXFLAGS) 
+PKG_LIBS = $(SHLIB_CFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
