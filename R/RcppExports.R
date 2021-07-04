@@ -17,3 +17,43 @@ SolveFixedEffects <- function(data, wrappedFixedEffects, coreNum = 1L) {
     .Call(`_fastplm_SolveFixedEffects`, data, wrappedFixedEffects, coreNum)
 }
 
+clustercpp <- function(rawcl, X, Res, invX, q) {
+    .Call(`_fastplm_clustercpp`, rawcl, X, Res, invX, q)
+}
+
+ivclustercpp <- function(rawcl, X, Res, invxPzx, q, invzzx) {
+    .Call(`_fastplm_ivclustercpp`, rawcl, X, Res, invxPzx, q, invzzx)
+}
+
+solveiv <- function(Y, X, Z) {
+    .Call(`_fastplm_solveiv`, Y, X, Z)
+}
+
+solvecpp <- function(X) {
+    .Call(`_fastplm_solvecpp`, X)
+}
+
+solvegmm <- function(Y, X, Z, u_hat) {
+    .Call(`_fastplm_solvegmm`, Y, X, Z, u_hat)
+}
+
+solvegmm_meat <- function(Y, X, Z, meat) {
+    .Call(`_fastplm_solvegmm_meat`, Y, X, Z, meat)
+}
+
+simpleols <- function(Y, X) {
+    .Call(`_fastplm_simpleols`, Y, X)
+}
+
+rcpparma_outerproduct <- function(x) {
+    .Call(`_fastplm_rcpparma_outerproduct`, x)
+}
+
+rcpparma_innerproduct <- function(x) {
+    .Call(`_fastplm_rcpparma_innerproduct`, x)
+}
+
+rcpparma_bothproducts <- function(x) {
+    .Call(`_fastplm_rcpparma_bothproducts`, x)
+}
+

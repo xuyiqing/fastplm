@@ -52,7 +52,7 @@ create.fixed.effects <- function(inds, sfes = NULL, cfes = NULL) {
 
   sfes <-
     if (is.null(sfes))
-      SEQ(1, length(inds$levels))
+      NULL#SEQ(1, length(inds$levels))
     else
       sapply(sfes, function(id) locate.effect(inds, id))
 

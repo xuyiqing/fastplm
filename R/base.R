@@ -23,7 +23,7 @@ CHECK.INPUT <- function(x, arg.name, arg.class, check.type = NULL) {
     stop(ERR.GEN.arg.invalid(arg.name, arg.class))
   }
 
-  if (class(x) != arg.class)
+  if (class(x)[1] != arg.class)
     stop(ERR.GEN.arg.invalid(arg.name, arg.class, class(x)))
 }
 

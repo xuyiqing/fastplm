@@ -58,15 +58,161 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
-RcppExport SEXP run_testthat_tests();
+// clustercpp
+List clustercpp(arma::mat rawcl, arma::mat X, arma::mat Res, arma::mat invX, double q);
+RcppExport SEXP _fastplm_clustercpp(SEXP rawclSEXP, SEXP XSEXP, SEXP ResSEXP, SEXP invXSEXP, SEXP qSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type rawcl(rawclSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Res(ResSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type invX(invXSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    rcpp_result_gen = Rcpp::wrap(clustercpp(rawcl, X, Res, invX, q));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ivclustercpp
+List ivclustercpp(arma::mat rawcl, arma::mat X, arma::mat Res, arma::mat invxPzx, double q, arma::mat invzzx);
+RcppExport SEXP _fastplm_ivclustercpp(SEXP rawclSEXP, SEXP XSEXP, SEXP ResSEXP, SEXP invxPzxSEXP, SEXP qSEXP, SEXP invzzxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type rawcl(rawclSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Res(ResSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type invxPzx(invxPzxSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type invzzx(invzzxSEXP);
+    rcpp_result_gen = Rcpp::wrap(ivclustercpp(rawcl, X, Res, invxPzx, q, invzzx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// solveiv
+List solveiv(arma::mat Y, arma::mat X, arma::mat Z);
+RcppExport SEXP _fastplm_solveiv(SEXP YSEXP, SEXP XSEXP, SEXP ZSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
+    rcpp_result_gen = Rcpp::wrap(solveiv(Y, X, Z));
+    return rcpp_result_gen;
+END_RCPP
+}
+// solvecpp
+arma::mat solvecpp(arma::mat X);
+RcppExport SEXP _fastplm_solvecpp(SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(solvecpp(X));
+    return rcpp_result_gen;
+END_RCPP
+}
+// solvegmm
+List solvegmm(arma::mat Y, arma::mat X, arma::mat Z, arma::mat u_hat);
+RcppExport SEXP _fastplm_solvegmm(SEXP YSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP u_hatSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type u_hat(u_hatSEXP);
+    rcpp_result_gen = Rcpp::wrap(solvegmm(Y, X, Z, u_hat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// solvegmm_meat
+List solvegmm_meat(arma::mat Y, arma::mat X, arma::mat Z, arma::mat meat);
+RcppExport SEXP _fastplm_solvegmm_meat(SEXP YSEXP, SEXP XSEXP, SEXP ZSEXP, SEXP meatSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type meat(meatSEXP);
+    rcpp_result_gen = Rcpp::wrap(solvegmm_meat(Y, X, Z, meat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// simpleols
+List simpleols(arma::mat Y, arma::mat X);
+RcppExport SEXP _fastplm_simpleols(SEXP YSEXP, SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(simpleols(Y, X));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_hello_world
+arma::mat rcpparma_hello_world();
+RcppExport SEXP _fastplm_rcpparma_hello_world() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(rcpparma_hello_world());
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_outerproduct
+arma::mat rcpparma_outerproduct(const arma::colvec& x);
+RcppExport SEXP _fastplm_rcpparma_outerproduct(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_outerproduct(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_innerproduct
+double rcpparma_innerproduct(const arma::colvec& x);
+RcppExport SEXP _fastplm_rcpparma_innerproduct(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_innerproduct(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_bothproducts
+Rcpp::List rcpparma_bothproducts(const arma::colvec& x);
+RcppExport SEXP _fastplm_rcpparma_bothproducts(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_bothproducts(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_fastplm_CreateFixedEffects", (DL_FUNC) &_fastplm_CreateFixedEffects, 6},
     {"_fastplm_ContainMultipleComponents", (DL_FUNC) &_fastplm_ContainMultipleComponents, 1},
     {"_fastplm_CheckComponents", (DL_FUNC) &_fastplm_CheckComponents, 2},
     {"_fastplm_SolveFixedEffects", (DL_FUNC) &_fastplm_SolveFixedEffects, 3},
-    {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 0},
+    {"_fastplm_clustercpp", (DL_FUNC) &_fastplm_clustercpp, 5},
+    {"_fastplm_ivclustercpp", (DL_FUNC) &_fastplm_ivclustercpp, 6},
+    {"_fastplm_solveiv", (DL_FUNC) &_fastplm_solveiv, 3},
+    {"_fastplm_solvecpp", (DL_FUNC) &_fastplm_solvecpp, 1},
+    {"_fastplm_solvegmm", (DL_FUNC) &_fastplm_solvegmm, 4},
+    {"_fastplm_solvegmm_meat", (DL_FUNC) &_fastplm_solvegmm_meat, 4},
+    {"_fastplm_simpleols", (DL_FUNC) &_fastplm_simpleols, 2},
+    {"_fastplm_rcpparma_hello_world", (DL_FUNC) &_fastplm_rcpparma_hello_world, 0},
+    {"_fastplm_rcpparma_outerproduct", (DL_FUNC) &_fastplm_rcpparma_outerproduct, 1},
+    {"_fastplm_rcpparma_innerproduct", (DL_FUNC) &_fastplm_rcpparma_innerproduct, 1},
+    {"_fastplm_rcpparma_bothproducts", (DL_FUNC) &_fastplm_rcpparma_bothproducts, 1},
     {NULL, NULL, 0}
 };
 
